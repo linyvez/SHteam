@@ -1,0 +1,10 @@
+@import "tailwindcss";
+@plugin 'daisyui/index.js';
+
+@theme {
+  --color-shteam-bg: #121212;
+  --color-shteam-comp: #1a1a1a;
+  --color-shteam-light-comp: #1e1e1e;
+  --color-shteam-input: #242424;
+  --color-navy-button: #77c0f4;
+}
