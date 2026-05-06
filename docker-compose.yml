@@ -7,6 +7,8 @@ services:
       - "27017:27017"
     volumes:
       - mongo1_data:/data/db
+    networks:
+      - shteam-net
 
   mongo2:
     image: mongo:7.0
@@ -16,6 +18,8 @@ services:
       - "27018:27018"
     volumes:
       - mongo2_data:/data/db
+    networks:
+      - shteam-net
 
   mongo3:
     image: mongo:7.0
@@ -25,6 +29,8 @@ services:
       - "27019:27019"
     volumes:
       - mongo3_data:/data/db
+    networks:
+      - shteam-net
 
   mongo-init:
     image: mongo:7.0
@@ -57,6 +63,42 @@ services:
           });
         }
         "
+    networks:
+      - shteam-net
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    hostname: minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ./minio-data:/data
+    networks:
+      - shteam-net
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: minio-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Waiting for MinIO...' &&
+      until mc alias set local http://minio:9000 minioadmin minioadmin; do sleep 2; done &&
+      echo 'Creating bucket...' &&
+      mc mb -p local/shader-thumbnails || true &&
+      echo 'Setting public download policy...' &&
+      mc anonymous set download local/shader-thumbnails &&
+      echo 'MinIO Initialization complete!'
+      "
+    networks:
+      - shteam-net
 
   catalog-service:
     build:
@@ -68,10 +110,11 @@ services:
     volumes:
       - ./apps/catalog-service:/app/apps/catalog-service
       - ./packages/shared:/app/packages/shared
-      # - /app/node_modules
     depends_on:
       mongo-init:
         condition: service_completed_successfully
+    networks:
+      - shteam-net
 
   frontend:
     build:
@@ -83,13 +126,20 @@ services:
     volumes:
       - ./apps/frontend:/app/apps/frontend
       - ./packages/shared:/app/packages/shared
-      # - /app/node_modules
     depends_on:
       - catalog-service
     environment:
       - NODE_ENV=development
+    networks:
+      - shteam-net
 
 volumes:
   mongo1_data:
   mongo2_data:
   mongo3_data:
+  minio-data:
+
+
+networks:
+  shteam-net:
+    driver: bridge
