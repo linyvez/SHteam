@@ -6,9 +6,10 @@ interface ShaderMeshProps {
     fragment: string;
     vertex: string;
     textureUrl: string | null;
+    customUniforms?: Record<string, number>;
 }
 
-export const ShaderMesh = ({ fragment, vertex, textureUrl }: ShaderMeshProps) => {
+export const ShaderMesh = ({ fragment, vertex, textureUrl, customUniforms = {} }: ShaderMeshProps) => {
     const { viewport } = useThree();
     const materialRef = useRef<THREE.ShaderMaterial>(null);
 
@@ -22,6 +23,20 @@ export const ShaderMesh = ({ fragment, vertex, textureUrl }: ShaderMeshProps) =>
             materialRef.current.uniforms.u_time.value = state.clock.elapsedTime;
         }
     });
+
+    useEffect(() => {
+        if (materialRef.current) {
+            Object.entries(customUniforms).forEach(([key, val]) => {
+                // If the uniform doesn't exist in Three.js yet, create it. Otherwise, update it.
+                if (!materialRef.current!.uniforms[key]) {
+                    materialRef.current!.uniforms[key] = { value: val };
+                } else {
+                    materialRef.current!.uniforms[key].value = val;
+                }
+            });
+            materialRef.current.uniformsNeedUpdate = true;
+        }
+    }, [customUniforms]); // Reruns every time a slider moves
 
     useEffect(() => {
         if (!textureUrl) return;
@@ -48,8 +63,6 @@ export const ShaderMesh = ({ fragment, vertex, textureUrl }: ShaderMeshProps) =>
             <planeGeometry args={[viewport.width, viewport.height]} />
             <shaderMaterial
                 ref={materialRef}
-                // PATCH: We are removing the test overrides and 
-                // passing the real database strings into the material!
                 vertexShader={vertex}
                 fragmentShader={fragment}
                 uniforms={uniforms}
