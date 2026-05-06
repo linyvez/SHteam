@@ -2,7 +2,7 @@ services:
   mongo1:
     image: mongo:7.0
     container_name: shteam-mongo1
-    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    command: [ "--replSet", "rs0", "--bind_ip_all", "--port", "27017" ]
     ports:
       - "27017:27017"
     volumes:
@@ -11,7 +11,7 @@ services:
   mongo2:
     image: mongo:7.0
     container_name: shteam-mongo2
-    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27018"]
+    command: [ "--replSet", "rs0", "--bind_ip_all", "--port", "27018" ]
     ports:
       - "27018:27018"
     volumes:
@@ -20,11 +20,72 @@ services:
   mongo3:
     image: mongo:7.0
     container_name: shteam-mongo3
-    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27019"]
+    command: [ "--replSet", "rs0", "--bind_ip_all", "--port", "27019" ]
     ports:
       - "27019:27019"
     volumes:
       - mongo3_data:/data/db
+
+  mongo-init:
+    image: mongo:7.0
+    container_name: shteam-mongo-init
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+    command:
+      - bash
+      - -c
+      - |
+        until mongosh --host mongo1:27017 --eval "db.adminCommand('ping')" --quiet &>/dev/null; do
+          sleep 2
+        done
+
+        mongosh --host mongo1:27017 --eval "
+        try {
+          rs.status();
+          console.log('Replica set already initialized.');
+        } catch (e) {
+          console.log('Initializing Replica Set...');
+          rs.initiate({
+            _id: 'rs0',
+            members: [
+              { _id: 0, host: 'mongo1:27017' },
+              { _id: 1, host: 'mongo2:27018' },
+              { _id: 2, host: 'mongo3:27019' }
+            ]
+          });
+        }
+        "
+
+  catalog-service:
+    build:
+      context: .
+      dockerfile: apps/catalog-service/Dockerfile
+    container_name: shteam-catalog
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+    container_name: shteam-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - catalog-service
+    environment:
+      - NODE_ENV=development
 
 volumes:
   mongo1_data:
