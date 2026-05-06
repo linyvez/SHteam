@@ -1,8 +1,26 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.KAFKA,
+    options: {
+      client: {
+        brokers: [process.env.KAFKA_BROKER || 'localhost:9092'],
+      },
+      consumer: {
+        groupId: 'social-consumer-group',
+      },
+    },
+  });
+
+  await app.startAllMicroservices();
+  await app.listen(3001);
+  
+  console.log('Social Service is running on http://localhost:3001');
+  console.log('Kafka Consumer is listening...');
 }
 bootstrap();
