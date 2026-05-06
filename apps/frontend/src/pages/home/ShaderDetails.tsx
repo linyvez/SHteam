@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import MainLayout from "../../layouts/MainLayout";
@@ -41,6 +41,7 @@ const ShaderMesh = ({ fragment, vertex, textureUrl }: { fragment: string, vertex
 // 2. The Main Page Component
 const ShaderDetails = () => {
     const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
     const [shader, setShader] = useState<Shader | null>(null);
     const [userTextureUrl, setUserTextureUrl] = useState<string | null>(null);
 
@@ -80,7 +81,14 @@ const ShaderDetails = () => {
                 </div>
 
                 {/* Right Side: Controls and Metadata */}
-                <div className="w-full md:w-96 flex flex-col gap-4 bg-shteam-comp p-6 rounded-box border border-gray-800">
+                <div className="w-full md:w-96 flex flex-col gap-4 bg-shteam-comp p-6 rounded-box border border-gray-800 relative">
+                    <button
+                        onClick={() => navigate("/catalog")}
+                        className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-gray-400 hover:text-white"
+                        aria-label="Close"
+                    >
+                        ✕
+                    </button>
                     <h1 className="text-3xl font-bold">{shader.title}</h1>
                     <span className="badge badge-primary">{shader.price === 0 ? "Free" : `$${shader.price}`}</span>
                     <p className="text-gray-400">{shader.description}</p>
