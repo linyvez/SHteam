@@ -86,7 +86,6 @@ export const Friends = () => {
         setFriendId('');
         fetchFriends();
       } else {
-        // ЧИТАЄМО ПОМИЛКУ ВІД БЕКЕНДУ
         const errorData = await response.json().catch(() => null);
         setStatus({ 
           type: 'error', 
