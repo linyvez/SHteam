@@ -1,4 +1,4 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Injectable, NotFoundException, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import * as neo4j from 'neo4j-driver';
 import { Driver } from 'neo4j-driver';
 
@@ -28,12 +28,17 @@ export class GraphService implements OnModuleInit, OnModuleDestroy {
     const session = this.driver.session();
     try {
       const query = `
+        MATCH (u2:User {id: $friendId})
         MERGE (u1:User {id: $userId})
-        MERGE (u2:User {id: $friendId})
         MERGE (u1)-[:FRIENDS_WITH]-(u2)
-        RETURN u1, u2
+        RETURN u2
       `;
-      await session.run(query, { userId, friendId });
+      const result = await session.run(query, { userId, friendId });
+
+      if (result.records.length === 0) {
+        throw new NotFoundException(`User with ID "${friendId}" does not exist.`);
+      }
+
       return { success: true, message: 'Friend connection established' };
     } finally {
       await session.close();
@@ -79,6 +84,35 @@ export class GraphService implements OnModuleInit, OnModuleDestroy {
         MERGE (u)-[:OWNS]->(s)
       `;
       await session.run(query, { userId, shaderId });
+    } finally {
+      await session.close();
+    }
+  }
+  async getFriends(userId: string) {
+    const session = this.driver.session();
+    try {
+      const query = `
+        MATCH (u:User {id: $userId})-[:FRIENDS_WITH]-(friend:User)
+        RETURN friend.id AS friendId
+      `;
+      const result = await session.run(query, { userId });
+      return result.records.map(record => record.get('friendId'));
+    } finally {
+      await session.close();
+    }
+  }
+
+  async searchUsers(query: string) {
+    const session = this.driver.session();
+    try {
+      const cypher = `
+        MATCH (u:User)
+        WHERE toLower(u.id) CONTAINS toLower($query)
+        RETURN u.id AS userId
+        LIMIT 5
+      `;
+      const result = await session.run(cypher, { query });
+      return result.records.map(record => record.get('userId'));
     } finally {
       await session.close();
     }

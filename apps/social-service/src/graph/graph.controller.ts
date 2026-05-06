@@ -14,4 +14,15 @@ export class GraphController {
   async getRecommendations(@Query('userId') userId: string) {
     return this.graphService.getRecommendations(userId);
   }
+
+  @Get('friends')
+  async getFriends(@Query('userId') userId: string) {
+    return this.graphService.getFriends(userId);
+  }
+
+  @Get('users/search')
+  async searchUsers(@Query('q') query: string) {
+    if (!query) return [];
+    return this.graphService.searchUsers(query);
+  }
 }
