@@ -1,42 +1,10 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Canvas } from "@react-three/fiber";
-import * as THREE from "three";
+import { ShaderMesh } from "../../webgl/ShaderMesh";
 import MainLayout from "../../layouts/MainLayout";
 import type { Shader } from "../../../../../packages/shared";
 
-// 1. The WebGL Component that actually renders the shader
-const ShaderMesh = ({ fragment, vertex, textureUrl }: { fragment: string, vertex: string, textureUrl: string | null }) => {
-    // Memoize uniforms so they don't recreate on every React render cycle
-    const uniforms = useMemo(() => ({
-        u_time: { value: 0 },
-        u_texture: { value: null as THREE.Texture | null }
-    }), []);
-
-    // Update the texture uniform whenever the user uploads a new image
-    useEffect(() => {
-        if (textureUrl) {
-            new THREE.TextureLoader().load(textureUrl, (loadedTexture) => {
-                // Ensure the texture maps correctly to PBR lighting/rendering standards
-                loadedTexture.colorSpace = THREE.SRGBColorSpace;
-                uniforms.u_texture.value = loadedTexture;
-            });
-        }
-    }, [textureUrl, uniforms]);
-
-    return (
-        <mesh>
-            {/* A simple flat plane to display 2D shaders. Change to boxGeometry for 3D */}
-            <planeGeometry args={[5, 5]} />
-            <shaderMaterial
-                vertexShader={vertex}
-                fragmentShader={fragment}
-                uniforms={uniforms}
-                side={THREE.DoubleSide}
-            />
-        </mesh>
-    );
-};
 
 // 2. The Main Page Component
 const ShaderDetails = () => {
@@ -75,7 +43,7 @@ const ShaderDetails = () => {
                         <ShaderMesh
                             fragment={shader.fragmentShader}
                             vertex={shader.vertexShader}
-                            textureUrl={userTextureUrl}
+                            textureUrl={userTextureUrl || shader.thumbnailUrl || "https://placehold.co/600x600/1a1a1a/ffffff?text=No+Image"}
                         />
                     </Canvas>
                 </div>
