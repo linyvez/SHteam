@@ -113,6 +113,8 @@ services:
     depends_on:
       mongo-init:
         condition: service_completed_successfully
+      minio-init:
+        condition: service_completed_successfully
     networks:
       - shteam-net
 
