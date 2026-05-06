@@ -66,8 +66,9 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - .:/app
-      - /app/node_modules
+      - ./apps/catalog-service:/app/apps/catalog-service
+      - ./packages/shared:/app/packages/shared
+      # - /app/node_modules
     depends_on:
       mongo-init:
         condition: service_completed_successfully
@@ -80,8 +81,9 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - .:/app
-      - /app/node_modules
+      - ./apps/frontend:/app/apps/frontend
+      - ./packages/shared:/app/packages/shared
+      # - /app/node_modules
     depends_on:
       - catalog-service
     environment:
