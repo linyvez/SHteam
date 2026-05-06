@@ -12,8 +12,10 @@ const Header = ({ type }: { type: string }) => {
           SHteam
         </Link>
       </div>
-      <div className="flex gap-2">
-        <label className="input bg-shteam-input">
+      
+      <div className="flex items-center gap-2">
+        
+        <label className="input bg-shteam-input flex items-center gap-2">
           <svg
             className="h-[1em] opacity-50"
             xmlns="http://www.w3.org/2000/svg"
@@ -30,7 +32,7 @@ const Header = ({ type }: { type: string }) => {
               <path d="m21 21-4.3-4.3"></path>
             </g>
           </svg>
-          <input type="search" required placeholder="Search shaders..." />
+          <input type="search" required placeholder="Search shaders..." className="w-full" />
         </label>
 
         <div className="flex-none">
