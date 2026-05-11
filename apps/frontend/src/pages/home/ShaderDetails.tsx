@@ -111,7 +111,7 @@ const ShaderDetails = () => {
                     <input type="file" accept="image/*" className="file-input file-input-bordered file-input-primary w-full" onChange={handleImageUpload} />
 
                     <div className="mt-auto pt-4">
-                        <button className="btn btn-success w-full">Add to Library</button>
+                        <button className="btn btn-success w-full" onClick={() => navigate(`/checkout/${id}`)}>Checkout</button>
                     </div>
                 </div>
             </div>

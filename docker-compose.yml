@@ -136,73 +136,70 @@ services:
     networks:
       - shteam-net
   
-  # kafka:
-  #   container_name: shteam-kafka
-  #   image: apache/kafka:latest
-  #   ports:
-  #     - "9092:9092"
-  #     - "9093:9093"
-  #   environment:
-  #     KAFKA_NODE_ID: 1
-  #     KAFKA_PROCESS_ROLES: 'broker,controller'
-  #     KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093'
-  #     KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092'
-  #     KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-  #     KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-  #     KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-  #     KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-  #     KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-  #     KAFKA_NUM_PARTITIONS: 3
-  #   volumes:
-  #   # TODO
-  #     - ./shared/init-kafka.sh:/init-kafka.sh
-  #   post_start:
-  #     - command: ./init-kafka.sh
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 30s
+  kafka:
+    container_name: shteam-kafka
+    image: apache/kafka:latest
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092'
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 3
+    volumes:
+      - ./scripts/init-kafka.sh:/init-kafka.sh
+    post_start:
+      - command: ./init-kafka.sh
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
   
-  # cassandra:
-  #   image: "cassandra:latest"
-  #   container_name: "shteam-cassandra"
-  #   ports:
-  #     - 9042:9042
-  #   environment:
-  #     - CASSANDRA_RPC_ADDRESS=0.0.0.0
-  #     - CASSANDRA_LISTEN_ADDRESS=auto
-  #     - CASSANDRA_BROADCAST_ADDRESS=cassandra
-  #     - CASSANDRA_CLUSTER_NAME=shteam_cluster
-  #     - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
-  #     - CASSANDRA_DC=shteam_datacenter
-  #     - HEAP_NEWSIZE=500
-  #     - MAX_HEAP_SIZE=2G
-  #   volumes:
-  #     # TODO
-  #     - cassandra_data:/var/lib/cassandra:rw
-  #   restart:
-  #     on-failure
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces'"]
-  #     interval: 10s
-  #     start_period: 30s
-  #     timeout: 5s
-  #     retries: 10
+  cassandra:
+    image: "cassandra:latest"
+    container_name: "shteam-cassandra"
+    ports:
+      - 9042:9042
+    environment:
+      - CASSANDRA_RPC_ADDRESS=0.0.0.0
+      - CASSANDRA_LISTEN_ADDRESS=auto
+      - CASSANDRA_BROADCAST_ADDRESS=cassandra
+      - CASSANDRA_CLUSTER_NAME=shteam_cluster
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_DC=shteam_datacenter
+      - HEAP_NEWSIZE=500
+      - MAX_HEAP_SIZE=2G
+    volumes:
+      - cassandra-data:/var/lib/cassandra:rw
+    restart:
+      on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces'"]
+      interval: 10s
+      start_period: 30s
+      timeout: 5s
+      retries: 10
 
-  # cassandra-load-keyspace:
-    # image: "cassandra:latest"
-    # container_name: "shteam-cassandra-init-script"
-    # depends_on:
-    #   cassandra:
-    #     condition: service_healthy
-    # volumes:
-    # # TODO
-    #   - ./shared/init.cql:/init.cql:ro
-    # command: cqlsh cassandra -f /init.cql
+  cassandra-init:
+    image: "cassandra:latest"
+    container_name: "shteam-cassandra-init"
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    volumes:
+      - ./scripts/init-cassandra.cql:/init.cql:ro
+    command: cqlsh cassandra -f /init.cql
   frontend:
     build:
       context: .
@@ -225,6 +222,7 @@ volumes:
   mongo2_data:
   mongo3_data:
   minio-data:
+  cassandra-data:
 
 
 networks:
