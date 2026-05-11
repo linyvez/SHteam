@@ -162,6 +162,8 @@ services:
       - ./scripts/init-kafka.sh:/init-kafka.sh
     post_start:
       - command: ./init-kafka.sh
+    networks:
+      - shteam-net
     healthcheck:
       test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"]
       interval: 30s
@@ -187,6 +189,8 @@ services:
       - cassandra-data:/var/lib/cassandra:rw
     restart:
       on-failure
+    networks:
+      - shteam-net
     healthcheck:
       test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces'"]
       interval: 10s
@@ -203,6 +207,8 @@ services:
     volumes:
       - ./scripts/init-cassandra.cql:/init.cql:ro
     command: cqlsh cassandra -f /init.cql
+    networks:
+      - shteam-net
   frontend:
     build:
       context: .

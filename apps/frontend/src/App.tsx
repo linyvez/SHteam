@@ -25,7 +25,7 @@ function App() {
 
       <Route path="/library" element={<Library />} />
 
-      <Route path="/checkout/:id" element={<Checkout />} />
+      <Route path="/checkout/:shaderId" element={<Checkout />} />
 
     </Routes>
   );

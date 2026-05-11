@@ -3,14 +3,15 @@ import { Kafka, Producer } from 'kafkajs'
 
 @Injectable()
 export class KafkaService implements OnModuleInit, OnModuleDestroy {
+    private kafka: Kafka;
     private producer: Producer;
 
     async onModuleInit() {
-        const kafka = new Kafka({
+        this.kafka = new Kafka({
           clientId: 'order-service',
           brokers: [process.env.KAFKA_URL ?? 'localhost:9092']
         });
-        this.producer = kafka.producer();
+        this.producer = this.kafka.producer();
         await this.producer.connect();
     }
 
@@ -19,6 +20,10 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
             topic,
             messages: [{ value: msg }]
         });
+    }
+
+    createConsumer(group: string) {
+        return this.kafka.consumer({ groupId: group });
     }
 
     async onModuleDestroy() {

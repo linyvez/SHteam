@@ -12,7 +12,6 @@ const Catalog = () => {
   useEffect(() => {
     const fetchShaders = async () => {
       try {
-        // Fetching directly from your NestJS Catalog Service!
         const response = await fetch("http://localhost:3000/api/catalog/shaders");
         if (!response.ok) throw new Error("Failed to fetch shaders");
 

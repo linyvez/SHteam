@@ -20,6 +20,16 @@ export class CassandraService implements OnModuleInit, OnModuleDestroy {
         return result.rows;
     }
 
+    async writeOrder (user_id: string, shader_id: string, event_time: Date) {
+        const query = 'INSERT INTO shteam_order_history.orders_by_id (user_id, shader_id, event_time) VALUES (?, ?, ?)';
+        try {
+            await this.client.execute(query, [user_id, shader_id, event_time], {prepare: true});
+        } catch (err) {
+            console.log('Failed to write to Cassandra', err);
+        }
+
+    }
+
     async onModuleDestroy() {
         await this.client.shutdown();
     }

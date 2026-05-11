@@ -4,22 +4,26 @@ import MainLayout from "../../layouts/MainLayout";
 import type { Shader } from "../../../../../packages/shared";
 
 const Checkout = () => {
-    const { id } = useParams<{ id: string }>();
+    const { shaderId } = useParams<{ shaderId: string }>();
     const [shader, setShader] = useState<Shader | null>(null);
     const navigate = useNavigate();
 
+    // PLACHOLDER
+    const userId = '100';
+
     useEffect(() => {
-            fetch(`http://localhost:3000/api/catalog/shaders/${id}`)
+            fetch(`http://localhost:3000/api/catalog/shaders/${shaderId}`)
                 .then((res) => res.json())
                 .then((data: Shader) => {
                     setShader(data);
 
                 })
                 .catch((err) => console.error(err));
-        }, [id]);
+        }, [shaderId]);
 
 
     if (!shader) return <MainLayout><div className="loading loading-spinner mt-20"></div></MainLayout>;
+    
 
     return (
         <MainLayout>
@@ -69,9 +73,13 @@ const Checkout = () => {
                     </div>
                     <button
                         className="btn btn-success btn-lg w-full mt-6 shadow-lg"
-                        onClick={() => {
+                        onClick={async () => {
+                            await fetch('http://localhost:3001/api/orders/purchase', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ shaderId, userId }),
+                            })
                             navigate('/library');
-                            alert(`Shader ${shader.title} added to library!`);
                         }}
                     >
                         Confirm Purchase
