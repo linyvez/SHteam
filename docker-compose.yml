@@ -123,6 +123,9 @@ services:
       context: .
       dockerfile: apps/order-service/Dockerfile
     container_name: shteam-order
+    environment:
+      - "CASSANDRA_URL=shteam-cassandra:9042"
+      - "KAFKA_URL=shteam-kafka:9092"
     ports:
       - "3001:3001"
     volumes:
