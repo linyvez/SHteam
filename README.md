@@ -19,22 +19,15 @@ SHteam is a specialized platform for discovering, testing, and collecting WebGL 
 
 ## How to Run
 
-1. Install dependencies from the root folder:
+1. Run Docker:
 
 ```
-npm install
+docker-compose up --build -d
 ```
 
-2. Start the development environment:
+2. Access the platform:
 
-```
-npm run dev
-```
-
-3. Access the platform:
-
-- Frontend: http://localhost:5173
-- Identity API: http://localhost:3000
+- http://localhost:5173
 
 ### Gateway failover test
 
@@ -45,7 +38,5 @@ npm run dev
 ```
 docker stop shteam-identity-1
 ```
-
-Wait about 3 seconds.
 
 2. Go back to the website - session should stay the same, so there will be no need to login again.
