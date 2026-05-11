@@ -2,7 +2,7 @@ services:
   mongo1:
     image: mongo:7.0
     container_name: shteam-mongo1
-    command: [ "--replSet", "rs0", "--bind_ip_all", "--port", "27017" ]
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
     ports:
       - "27017:27017"
     volumes:
@@ -13,7 +13,7 @@ services:
   mongo2:
     image: mongo:7.0
     container_name: shteam-mongo2
-    command: [ "--replSet", "rs0", "--bind_ip_all", "--port", "27018" ]
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27018"]
     ports:
       - "27018:27018"
     volumes:
@@ -24,7 +24,7 @@ services:
   mongo3:
     image: mongo:7.0
     container_name: shteam-mongo3
-    command: [ "--replSet", "rs0", "--bind_ip_all", "--port", "27019" ]
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27019"]
     ports:
       - "27019:27019"
     volumes:
@@ -118,6 +118,65 @@ services:
     networks:
       - shteam-net
 
+  # Identity service
+  postgres:
+    image: postgres:15-alpine
+    container_name: shteam-postgres
+    environment:
+      POSTGRES_USER: shteam_user
+      POSTGRES_PASSWORD: shteam_password
+      POSTGRES_DB: identity_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - shteam-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: shteam-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - shteam-net
+
+  identity-service-1:
+    build:
+      context: .
+      dockerfile: apps/identity-service/Dockerfile
+    container_name: shteam-identity-1
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - shteam-net
+
+  identity-service-2:
+    build:
+      context: .
+      dockerfile: apps/identity-service/Dockerfile
+    container_name: shteam-identity-2
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - shteam-net
+
+  api-gateway:
+    image: nginx:alpine
+    container_name: shteam-api-gateway
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - identity-service-1
+      - identity-service-2
+      - catalog-service
+    networks:
+      - shteam-net
+
   frontend:
     build:
       context: .
@@ -140,7 +199,7 @@ volumes:
   mongo2_data:
   mongo3_data:
   minio-data:
-
+  postgres_data:
 
 networks:
   shteam-net:

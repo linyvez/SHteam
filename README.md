@@ -35,3 +35,17 @@ npm run dev
 
 - Frontend: http://localhost:5173
 - Identity API: http://localhost:3000
+
+### Gateway failover test
+
+0. Log in.
+
+1. Kill one of the identity services:
+
+```
+docker stop shteam-identity-1
+```
+
+Wait about 3 seconds.
+
+2. Go back to the website - session should stay the same, so there will be no need to login again.
