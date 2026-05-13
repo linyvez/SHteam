@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import MainLayout from "../../layouts/MainLayout";
 import { useAuthStore } from "../../store/authStore";
@@ -37,16 +38,19 @@ const mockFriends = [
 ];
 
 const Profile = () => {
-  const { user, logout } = useAuthStore();
+  const { user, logout, topUpBalance } = useAuthStore();
   const navigate = useNavigate();
+
+  const [bankCredits, setBankCredits] = useState(1000);
+  const [isToppingUp, setIsToppingUp] = useState(false);
 
   const displayName = user?.email?.split("@")[0] || "ShaderHunter";
 
   const formattedDate = user?.created_at
     ? new Date(user.created_at).toLocaleDateString("en-US", {
-        month: "long",
-        year: "numeric",
-      })
+      month: "long",
+      year: "numeric",
+    })
     : null;
 
   const handleLogout = async () => {
@@ -55,6 +59,19 @@ const Profile = () => {
       navigate("/login");
     } catch (err) {
       console.error("Failed to logout cleanly", err);
+    }
+  };
+
+  const handleTopUp = async () => {
+    if (bankCredits < 50) return;
+    setIsToppingUp(true);
+    try {
+      await topUpBalance(50); // Add $50 to account
+      setBankCredits(prev => prev - 50); // Deduct from the virtual bank
+    } catch (err) {
+      console.error("Top up failed", err);
+    } finally {
+      setIsToppingUp(false);
     }
   };
 
@@ -96,6 +113,28 @@ const Profile = () => {
               className="btn btn-outline border-[#4c2a2a] text-[#d08787] hover:bg-[#4c2a2a] hover:text-white hover:border-[#4c2a2a] w-32"
             >
               Logout
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-shteam-comp border border-base-300 rounded-box p-6 flex items-center justify-between shadow-lg">
+          <div>
+            <h3 className="text-xl font-bold text-gray-200">Wallet Balance</h3>
+            <p className="text-4xl font-mono text-green-400 mt-2">
+              ${(Number(user?.balance) || 0).toFixed(2)}
+            </p>
+          </div>
+
+          <div className="flex flex-col items-end gap-2">
+            <p className="text-sm text-gray-500">
+              External Bank: <span className="font-mono text-gray-400">${bankCredits.toFixed(2)}</span>
+            </p>
+            <button
+              onClick={handleTopUp}
+              disabled={isToppingUp || bankCredits < 50}
+              className="btn btn-primary"
+            >
+              {isToppingUp ? <span className="loading loading-spinner"></span> : "+ Add $50.00"}
             </button>
           </div>
         </div>

@@ -125,7 +125,7 @@ const ShaderDetails = () => {
                                         min="0"
                                         max="1"
                                         step="0.01"
-                                        value={value}
+                                        value={Number(value) || 0}
                                         className="range range-xs range-secondary"
                                         onChange={(e) =>
                                             handleSliderChange(name, parseFloat(e.target.value))

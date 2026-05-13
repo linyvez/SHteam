@@ -183,7 +183,9 @@ services:
     command: >
       bash -c "
       echo 'Waiting for Kafka...' &&
-      /opt/kafka/bin/kafka-topics.sh --create --if-not-exists --topic purchase_events --partitions 1 --replication-factor 1 --bootstrap-server shteam-kafka:9092 &&
+      /opt/kafka/bin/kafka-topics.sh --create --if-not-exists --topic ORDER_INITIATED --partitions 1 --replication-factor 1 --bootstrap-server shteam-kafka:9092 &&
+      /opt/kafka/bin/kafka-topics.sh --create --if-not-exists --topic FUNDS_RESERVED --partitions 1 --replication-factor 1 --bootstrap-server shteam-kafka:9092 &&
+      /opt/kafka/bin/kafka-topics.sh --create --if-not-exists --topic INSUFFICIENT_FUNDS --partitions 1 --replication-factor 1 --bootstrap-server shteam-kafka:9092 &&
       echo 'Topic creation done!'
       "
     networks:

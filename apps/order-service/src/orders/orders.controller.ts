@@ -4,29 +4,30 @@ import { CassandraService } from './cassandra.service';
 
 @Controller('/api/orders')
 export class OrdersController {
-    constructor(
-      private readonly kafkaService: KafkaService,
-      private readonly cassandraService: CassandraService,
-    )  {}
+  constructor(
+    private readonly kafkaService: KafkaService,
+    private readonly cassandraService: CassandraService,
+  ) { }
 
 
-    @Post('/purchase')
-    async postPurchase(@Body() body: { shaderId: string, userId: string }) {
-      const { shaderId, userId } = body;
-      const timestampMs = Date.now();
-      const msg = {
-        user_id: userId,
-        shader_id: shaderId,
-        event_time: timestampMs
-      };
-      await this.kafkaService.sendMessage('purchase_events', JSON.stringify(msg));
+  @Post('/purchase')
+  async postPurchase(@Body() body: { shaderId: string, userId: string, price: number }) {
+    const { shaderId, userId, price } = body;
+    const timestampMs = Date.now();
+    const msg = {
+      user_id: userId,
+      shader_id: shaderId,
+      price: price,
+      event_time: timestampMs
+    };
+    await this.kafkaService.sendMessage('ORDER_INITIATED', JSON.stringify(msg));
 
-      return { status: 'ok' };
-    }
-  
-    @Get('/history')
-    async getHistory(@Query('userId') userId: string) {
-      const orders = await this.cassandraService.getOrders(userId);
-      return { user_orders: orders };
-    }
+    return { status: 'pending' };
+  }
+
+  @Get('/history')
+  async getHistory(@Query('userId') userId: string) {
+    const orders = await this.cassandraService.getOrders(userId);
+    return { user_orders: orders };
+  }
 }

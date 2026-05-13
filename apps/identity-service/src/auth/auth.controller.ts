@@ -10,7 +10,7 @@ import { AuthService } from './auth.service';
 
 @Controller('api/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('register')
   async register(@Body() body: any) {
@@ -44,5 +44,18 @@ export class AuthController {
     const validation = await this.validate(authHeader);
 
     return this.authService.getProfile(validation.user.sub);
+  }
+
+  @Post('topup')
+  async topUpBalance(
+    @Body() body: { amount: number },
+    @Headers('authorization') authHeader: string
+  ) {
+    // 1. Reuse your existing validation to get the user ID!
+    const validation = await this.validate(authHeader);
+    const userId = validation.user.sub; // Assuming 'sub' holds the user ID in your JWT payload
+
+    // 2. Delegate the database work to the AuthService
+    return this.authService.topUp(userId, body.amount);
   }
 }

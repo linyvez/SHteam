@@ -9,7 +9,6 @@ const Checkout = () => {
     const [shader, setShader] = useState<Shader | null>(null);
     const navigate = useNavigate();
 
-    // PLACHOLDER
     const { user } = useAuthStore();
 
     useEffect(() => {
@@ -24,6 +23,12 @@ const Checkout = () => {
 
 
     if (!shader || !user) return <MainLayout><div className="loading loading-spinner mt-20"></div></MainLayout>;
+
+    const isFree = shader.price === 0;
+    const platformFee = isFree ? 0 : 0.50;
+    const totalPrice = isFree ? 0 : Number(shader.price) + platformFee;
+
+    const canAfford = (Number(user.balance) || 0) >= totalPrice;
 
 
     return (
@@ -61,29 +66,38 @@ const Checkout = () => {
                             <div className="flex justify-between border-t border-base-200 pt-2 mt-2 text-lg font-bold">
                                 <span>Total</span>
                                 <span>
-                                    {shader.price === 0 ? "$0.00" : `$${(Number(shader.price) + 0.5).toFixed(2)}`}
+                                    {shader.price === 0 ? "$0.00" : `$${totalPrice.toFixed(2)}`}
                                 </span>
                             </div>
                         </div>
-                        <div className="mt-6 text-gray-400 text-sm">
-                            <p>
-                                <strong>Note:</strong> This is a demo checkout. No real payment is processed.<br />
-                                By confirming, you agree to add this shader to your library.
-                            </p>
+                        <div className="mt-6 flex flex-col gap-2">
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-gray-400">Current Wallet Balance:</span>
+                                <span className={`font-mono font-bold ${canAfford ? 'text-green-400' : 'text-red-400'}`}>
+                                    ${(Number(user.balance) || 0).toFixed(2)}
+                                </span>
+                            </div>
+
+                            {!canAfford && (
+                                <div className="alert alert-error mt-2 shadow-sm rounded-lg p-3">
+                                    <span className="text-sm font-semibold">Insufficient funds. Please top up your wallet in your profile.</span>
+                                </div>
+                            )}
                         </div>
                     </div>
                     <button
                         className="btn btn-success btn-lg w-full mt-6 shadow-lg"
+                        disabled={!canAfford}
                         onClick={async () => {
                             await fetch('/api/orders/purchase', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ shaderId, userId: user.id }),
+                                body: JSON.stringify({ shaderId, userId: user.id, price: totalPrice }),
                             })
                             navigate('/library');
                         }}
                     >
-                        Confirm Purchase
+                        {canAfford ? "Confirm Purchase" : "Cannot Afford"}
                     </button>
                 </div>
             </div>

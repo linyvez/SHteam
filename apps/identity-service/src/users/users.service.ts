@@ -30,4 +30,8 @@ export class UsersService {
       where: { id },
     });
   }
+
+  async save(user: User): Promise<User> {
+    return this.usersRepository.save(user);
+  }
 }

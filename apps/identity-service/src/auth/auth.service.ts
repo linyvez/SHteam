@@ -90,4 +90,22 @@ export class AuthService {
     const { password_hash, ...safeUser } = user;
     return safeUser;
   }
+
+  async topUp(userId: string, amount: number) {
+    // 1. Fetch the user using the exact method your UsersService exposes
+    const user = await this.usersService.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // 2. Add the amount (convert to Number just to be safe from string concatenation)
+    user.balance = Number(user.balance || 0) + Number(amount);
+
+    // 3. Save the updated user using the new save method
+    await this.usersService.save(user);
+
+    // 4. Return the new balance to update the React state
+    return { newBalance: user.balance };
+  }
 }

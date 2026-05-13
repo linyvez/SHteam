@@ -1,12 +1,13 @@
 import { create } from "zustand";
 
 interface AuthState {
-  user: { id: string; email: string; created_at?: string } | null;
+  user: { id: string; email: string; balance: number; created_at?: string } | null;
   token: string | null;
   login: (email: string, pass: string) => Promise<void>;
   register: (email: string, pass: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
+  topUpBalance: (amount: number) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -72,6 +73,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     } catch (err) {
       console.error("Failed to fetch user profile", err);
+    }
+  },
+
+  topUpBalance: async (amount: number) => {
+    const token = get().token;
+    if (!token) return;
+
+    // Send the top-up request to the Identity Service via the Nginx Gateway
+    const res = await fetch("/api/auth/topup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ amount }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      // Update the global state with the new balance from the database!
+      set((state) => ({
+        user: state.user ? { ...state.user, balance: data.newBalance } : null,
+      }));
     }
   },
 }));
