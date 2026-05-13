@@ -29,8 +29,10 @@ const Header = ({ type }: { type: string }) => {
           SHteam
         </Link>
       </div>
-      <div className="flex gap-2">
-        <label className="input bg-shteam-input">
+      
+      <div className="flex items-center gap-2">
+        
+        <label className="input bg-shteam-input flex items-center gap-2">
           <svg
             className="h-[1em] opacity-50"
             xmlns="http://www.w3.org/2000/svg"

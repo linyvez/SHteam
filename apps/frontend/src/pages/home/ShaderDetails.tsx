@@ -72,12 +72,13 @@ const ShaderDetails = () => {
         setDynamicSliders((prev) => ({ ...prev, [name]: value }));
     };
 
-    if (!shader || !user)
-        return (
-            <MainLayout>
-                <div className="loading loading-spinner mt-20"></div>
-            </MainLayout>
-        );
+    if (!shader || !user) return (
+        <MainLayout>
+            <div className="flex justify-center mt-20">
+                <span className="loading loading-spinner text-[#5f859d] loading-lg"></span>
+            </div>
+        </MainLayout>
+    );
 
     return (
         <MainLayout>
@@ -98,30 +99,28 @@ const ShaderDetails = () => {
                 </div>
 
                 <div className="w-full md:w-96 flex flex-col gap-4 bg-shteam-comp p-6 rounded-box border border-gray-800 relative overflow-y-auto">
-                    <button
-                        onClick={() => navigate("/catalog")}
-                        className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-gray-400 hover:text-white"
-                    >
-                        ✕
-                    </button>
+                    <button onClick={() => navigate("/catalog")} className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-gray-400 hover:text-white">✕</button>
+                    
                     <h1 className="text-3xl font-bold pr-8">{shader.title}</h1>
-                    <span className="badge badge-primary">
-                        {shader.price === 0 ? "Free" : `$${shader.price}`}
+                    
+                    <span className="font-mono text-cyan-400 font-bold bg-base-300 px-3 py-1 rounded-md border border-gray-700 w-fit">
+                        {shader.price === 0 ? "FREE" : `$${shader.price}`}
                     </span>
+                    
                     <p className="text-gray-400">{shader.description}</p>
 
-                    <div className="divider">Controls</div>
+                    <div className="divider before:bg-gray-800 after:bg-gray-800 text-gray-500">Controls</div>
 
                     {Object.keys(dynamicSliders).length === 0 ? (
                         <p className="text-sm text-gray-500 italic">
                             No custom parameters detected in this shader.
                         </p>
                     ) : (
-                        <div className="flex flex-col gap-4 bg-base-300 p-4 rounded-lg">
+                        <div className="flex flex-col gap-4 bg-base-300 border border-gray-800 p-4 rounded-lg">
                             {Object.entries(dynamicSliders).map(([name, value]) => (
                                 <div key={name} className="flex flex-col gap-1">
                                     <div className="flex justify-between text-sm">
-                                        <label className="font-mono text-secondary">{name}</label>
+                                        <label className="font-mono text-[#5f859d]">{name}</label>
                                         <span className="text-gray-400">{value.toFixed(2)}</span>
                                     </div>
                                     <input
@@ -130,17 +129,15 @@ const ShaderDetails = () => {
                                         max="1"
                                         step="0.01"
                                         value={Number(value) || 0}
-                                        className="range range-xs range-secondary"
-                                        onChange={(e) =>
-                                            handleSliderChange(name, parseFloat(e.target.value))
-                                        }
+                                        className="range range-xs accent-[#5f859d] [&::-webkit-slider-thumb]:bg-[#5f859d]"
+                                        onChange={(e) => handleSliderChange(name, parseFloat(e.target.value))}
                                     />
                                 </div>
                             ))}
                         </div>
                     )}
 
-                    <div className="divider"></div>
+                    <div className="divider before:bg-gray-800 after:bg-gray-800"></div>
 
                     <h3 className="text-lg font-semibold mb-2">Test Your Image</h3>
                     <input
@@ -152,7 +149,7 @@ const ShaderDetails = () => {
 
                     <div className="mt-auto pt-4">
                         {isCheckingOwnership ? (
-                            <button className="btn btn-neutral w-full" disabled>
+                            <button className="btn btn-neutral w-full bg-base-300 border-gray-700 focus:outline-none hover:border-[#5f859d] transition-colors" disabled>
                                 <span className="loading loading-spinner"></span> Checking status...
                             </button>
                         ) : isOwned ? (
@@ -164,7 +161,7 @@ const ShaderDetails = () => {
                             </button>
                         ) : (
                             <button
-                                className="btn btn-success w-full"
+                                className="btn border-none bg-[#5f859d] hover:bg-[#4a6b82] text-white w-full"
                                 onClick={() => navigate(`/checkout/${id}`)}
                             >
                                 Add to Library

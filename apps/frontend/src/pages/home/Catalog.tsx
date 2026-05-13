@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import MainLayout from "../../layouts/MainLayout";
 import type { Shader } from "../../../../../packages/shared";
 import { useSearchStore } from "../../store/searchStore";
+import { Recommendations } from "../social/Recommendations";
 
 const Catalog = () => {
   const [shaders, setShaders] = useState<Shader[]>([]);
@@ -19,6 +20,7 @@ const Catalog = () => {
     }, 500);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+  const currentUserId = "ira123"; // hardcoded user id, change later
 
   useEffect(() => {
     const fetchShaders = async () => {
@@ -44,9 +46,9 @@ const Catalog = () => {
       <div className="w-full max-w-6xl flex flex-col gap-6">
         <h1 className="text-3xl font-bold">Shader Catalog</h1>
 
-        {loading && (
-          <span className="loading loading-spinner loading-lg mx-auto mt-10"></span>
-        )}
+        <Recommendations userId={currentUserId} />
+
+        {loading && <span className="loading loading-spinner loading-lg mx-auto mt-10"></span>}
 
         {error && (
           <div className="alert alert-error">
@@ -62,12 +64,11 @@ const Catalog = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {shaders.map((shader) => (
-            <div
-              key={shader._id}
-              className="card bg-shteam-comp shadow-xl border border-gray-800"
+            <div 
+              key={shader._id} 
+              className="card bg-shteam-comp shadow-xl border border-gray-800 rounded-2xl hover:border-[#5f859d] transition-colors overflow-hidden"
             >
-              {/* Placeholder for the Three.js thumbnail later */}
-              <figure className="h-48 bg-base-300 overflow-hidden border-b border-base-300">
+              <figure className="h-48 bg-base-300 border-b border-gray-800 relative">
                 <img
                   src={
                     shader.thumbnailUrl ||
@@ -78,18 +79,18 @@ const Catalog = () => {
                 />
               </figure>
 
-              <div className="card-body p-4">
-                <h2 className="card-title text-lg">{shader.title}</h2>
-                <p className="text-sm text-gray-400 line-clamp-2">
+              <div className="card-body p-5">
+                <h2 className="card-title text-lg truncate">{shader.title}</h2>
+                <p className="text-sm text-gray-400 line-clamp-2 h-10">
                   {shader.description || "No description provided."}
                 </p>
-                <div className="card-actions justify-between items-center mt-4">
+                <div className="card-actions justify-between items-center mt-4 pt-4 border-t border-gray-800">
                   <span className="font-mono text-green-400 font-bold">
                     {shader.price === 0 ? "FREE" : `$${shader.price}`}
                   </span>
-                  <Link
-                    to={`/shader/${shader._id}`}
-                    className="btn btn-sm btn-primary"
+                  <Link 
+                    to={`/shader/${shader._id}`} 
+                    className="btn btn-sm border-none bg-[#5f859d] hover:bg-[#4a6b82] text-white"
                   >
                     View Details
                   </Link>
