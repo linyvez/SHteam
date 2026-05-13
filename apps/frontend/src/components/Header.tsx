@@ -1,14 +1,31 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
+import { useAuthStore } from "../store/authStore";
+import { useSearchStore } from "../store/searchStore";
 
 const Header = ({ type }: { type: string }) => {
-  const profileOption = type === "signup" ? "Sign up" : "Logout";
+  const logout = useAuthStore((state) => state.logout);
+  const navigate = useNavigate();
+
+  const { searchQuery, setSearchQuery } = useSearchStore();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (err) {
+      console.error("Failed to logout cleanly", err);
+    }
+  };
 
   return (
     <header className="navbar bg-shteam-comp shadow-sm px-4">
       <div className="flex-1 flex items-center">
         <img src={logo} className="w-8 aspect-square object-contain" />
-        <Link to="/" className="btn btn-ghost text-xl hover:bg-transparent">
+        <Link
+          to="/catalog"
+          className="btn btn-ghost text-xl hover:bg-transparent"
+        >
           SHteam
         </Link>
       </div>
@@ -32,13 +49,18 @@ const Header = ({ type }: { type: string }) => {
               <path d="m21 21-4.3-4.3"></path>
             </g>
           </svg>
-          <input type="search" required placeholder="Search shaders..." className="w-full" />
+          <input
+            type="search"
+            placeholder="Search shaders..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </label>
 
         <div className="flex-none">
           <ul className="menu menu-horizontal px-1">
             <li>
-              <Link to="/">Store</Link>
+              <Link to="/catalog">Store</Link>
             </li>
             <li>
               <Link to="/library">Library</Link>
@@ -64,10 +86,22 @@ const Header = ({ type }: { type: string }) => {
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
           >
             <li>
-              <a className="justify-between">Profile</a>
+              <Link to="/profile" className="justify-between">
+                Profile
+              </Link>
             </li>
+
             <li>
-              <Link to="/login">{profileOption}</Link>
+              {type === "signup" ? (
+                <Link to="/register">Sign up</Link>
+              ) : (
+                <button
+                  onClick={handleLogout}
+                  className="text-left text-red-500 hover:text-red-600"
+                >
+                  Logout
+                </button>
+              )}
             </li>
           </ul>
         </div>

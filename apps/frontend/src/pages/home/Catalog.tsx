@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import MainLayout from "../../layouts/MainLayout";
 import type { Shader } from "../../../../../packages/shared";
+import { useSearchStore } from "../../store/searchStore";
 import { Recommendations } from "../social/Recommendations";
 
 const Catalog = () => {
@@ -9,14 +10,25 @@ const Catalog = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Search States
+  const searchQuery = useSearchStore((state) => state.searchQuery);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
   const currentUserId = "ira123"; // hardcoded user id, change later
 
   useEffect(() => {
     const fetchShaders = async () => {
+      setLoading(true);
       try {
-        const response = await fetch("http://localhost:3000/api/catalog/shaders");
+        const url = `/api/catalog/shaders?page=1&limit=20${debouncedSearch ? `&search=${encodeURIComponent(debouncedSearch)}` : ""}`;
+        const response = await fetch(url);
         if (!response.ok) throw new Error("Failed to fetch shaders");
-
         const data = await response.json();
         setShaders(data);
       } catch (err: any) {
@@ -27,7 +39,7 @@ const Catalog = () => {
     };
 
     fetchShaders();
-  }, []);
+  }, [debouncedSearch]);
 
   return (
     <MainLayout>
@@ -45,7 +57,9 @@ const Catalog = () => {
         )}
 
         {!loading && !error && shaders.length === 0 && (
-          <p className="text-gray-400">No shaders found. Be the first to upload one!</p>
+          <p className="text-gray-400">
+            No shaders found. Be the first to upload one!
+          </p>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -56,7 +70,10 @@ const Catalog = () => {
             >
               <figure className="h-48 bg-base-300 border-b border-gray-800 relative">
                 <img
-                  src={shader.thumbnailUrl || "https://placehold.co/600x400/1a1a1a/444444?text=No+Preview"}
+                  src={
+                    shader.thumbnailUrl ||
+                    "https://placehold.co/600x400/1a1a1a/444444?text=No+Preview"
+                  }
                   alt={shader.title}
                   className="w-full h-full object-cover transition-transform hover:scale-105"
                 />

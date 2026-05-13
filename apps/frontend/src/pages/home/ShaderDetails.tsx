@@ -4,17 +4,26 @@ import { Canvas } from "@react-three/fiber";
 import { ShaderMesh } from "../../webgl/ShaderMesh";
 import MainLayout from "../../layouts/MainLayout";
 import type { Shader } from "../../../../../packages/shared";
+import { useAuthStore } from "../../store/authStore";
 
 const ShaderDetails = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { user } = useAuthStore();
+
     const [shader, setShader] = useState<Shader | null>(null);
     const [userTextureUrl, setUserTextureUrl] = useState<string | null>(null);
+    const [dynamicSliders, setDynamicSliders] = useState<Record<string, number>>(
+        {},
+    );
 
-    const [dynamicSliders, setDynamicSliders] = useState<Record<string, number>>({});
+    const [isOwned, setIsOwned] = useState<boolean>(false);
+    const [isCheckingOwnership, setIsCheckingOwnership] = useState<boolean>(true);
 
     useEffect(() => {
-        fetch(`http://localhost:3000/api/catalog/shaders/${id}`)
+        if (!id) return;
+
+        fetch(`/api/catalog/shaders/${id}`)
             .then((res) => res.json())
             .then((data: Shader) => {
                 setShader(data);
@@ -27,7 +36,7 @@ const ShaderDetails = () => {
 
                 while ((match = regex.exec(combinedCode)) !== null) {
                     const uniformName = match[1];
-                    if (uniformName !== 'u_time') {
+                    if (uniformName !== "u_time") {
                         foundUniforms[uniformName] = 0.5;
                     }
                 }
@@ -35,6 +44,21 @@ const ShaderDetails = () => {
             })
             .catch((err) => console.error(err));
     }, [id]);
+
+
+    useEffect(() => {
+        if (!user || !id) return;
+
+        fetch(`/api/orders/history?userId=${user.id}`)
+            .then((res) => res.json())
+            .then((data) => {
+                const orders = data.user_orders || [];
+                setIsOwned(orders.some((order: any) => order.shader_id === id));
+            })
+            .catch((err) => console.error("Failed to verify ownership:", err))
+            .finally(() => setIsCheckingOwnership(false));
+
+    }, [id, user]);
 
     const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -45,10 +69,10 @@ const ShaderDetails = () => {
     };
 
     const handleSliderChange = (name: string, value: number) => {
-        setDynamicSliders(prev => ({ ...prev, [name]: value }));
+        setDynamicSliders((prev) => ({ ...prev, [name]: value }));
     };
 
-    if (!shader) return (
+    if (!shader || !user) return (
         <MainLayout>
             <div className="flex justify-center mt-20">
                 <span className="loading loading-spinner text-[#5f859d] loading-lg"></span>
@@ -64,7 +88,11 @@ const ShaderDetails = () => {
                         <ShaderMesh
                             fragment={shader.fragmentShader}
                             vertex={shader.vertexShader}
-                            textureUrl={userTextureUrl || shader.thumbnailUrl || "https://placehold.co/600x600/1a1a1a/ffffff?text=No+Image"}
+                            textureUrl={
+                                userTextureUrl ||
+                                shader.thumbnailUrl ||
+                                "https://placehold.co/600x600/1a1a1a/ffffff?text=No+Image"
+                            }
                             customUniforms={dynamicSliders}
                         />
                     </Canvas>
@@ -84,7 +112,9 @@ const ShaderDetails = () => {
                     <div className="divider before:bg-gray-800 after:bg-gray-800 text-gray-500">Controls</div>
 
                     {Object.keys(dynamicSliders).length === 0 ? (
-                        <p className="text-sm text-gray-500 italic">No custom parameters detected in this shader.</p>
+                        <p className="text-sm text-gray-500 italic">
+                            No custom parameters detected in this shader.
+                        </p>
                     ) : (
                         <div className="flex flex-col gap-4 bg-base-300 border border-gray-800 p-4 rounded-lg">
                             {Object.entries(dynamicSliders).map(([name, value]) => (
@@ -98,7 +128,7 @@ const ShaderDetails = () => {
                                         min="0"
                                         max="1"
                                         step="0.01"
-                                        value={value}
+                                        value={Number(value) || 0}
                                         className="range range-xs accent-[#5f859d] [&::-webkit-slider-thumb]:bg-[#5f859d]"
                                         onChange={(e) => handleSliderChange(name, parseFloat(e.target.value))}
                                     />
@@ -110,17 +140,33 @@ const ShaderDetails = () => {
                     <div className="divider before:bg-gray-800 after:bg-gray-800"></div>
 
                     <h3 className="text-lg font-semibold mb-2">Test Your Image</h3>
-                    <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="file-input file-input-bordered w-full bg-base-300 border-gray-700 focus:outline-none hover:border-[#5f859d] transition-colors" 
-                        onChange={handleImageUpload} 
+                    <input
+                        type="file"
+                        accept="image/*"
+                        className="file-input file-input-bordered file-input-primary w-full"
+                        onChange={handleImageUpload}
                     />
 
                     <div className="mt-auto pt-4">
-                        <button className="btn border-none bg-[#5f859d] hover:bg-[#4a6b82] text-white w-full">
-                            Add to Library
-                        </button>
+                        {isCheckingOwnership ? (
+                            <button className="btn btn-neutral w-full bg-base-300 border-gray-700 focus:outline-none hover:border-[#5f859d] transition-colors" disabled>
+                                <span className="loading loading-spinner"></span> Checking status...
+                            </button>
+                        ) : isOwned ? (
+                            <button
+                                className="btn btn-secondary w-full"
+                                onClick={() => navigate('/library')}
+                            >
+                                Already in Library
+                            </button>
+                        ) : (
+                            <button
+                                className="btn border-none bg-[#5f859d] hover:bg-[#4a6b82] text-white w-full"
+                                onClick={() => navigate(`/checkout/${id}`)}
+                            >
+                                Add to Library
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

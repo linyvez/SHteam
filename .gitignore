@@ -24,3 +24,6 @@ lerna-debug.log*
 .tmp
 
 minio-data/
+
+apps/*/package-lock.json
+packages/*/package-lock.json

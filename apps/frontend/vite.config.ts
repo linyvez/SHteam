@@ -5,7 +5,14 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    host: true, // This tells Vite to listen on 0.0.0.0
+    host: true,
     port: 5173,
-  }
+    proxy: {
+      "/api": {
+        target: "http://shteam-api-gateway:80",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 });
