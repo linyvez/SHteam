@@ -1,10 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { useAuthStore } from "../store/authStore";
+import { useSearchStore } from "../store/searchStore";
 
 const Header = ({ type }: { type: string }) => {
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
+
+  const { searchQuery, setSearchQuery } = useSearchStore();
 
   const handleLogout = async () => {
     try {
@@ -44,7 +47,12 @@ const Header = ({ type }: { type: string }) => {
               <path d="m21 21-4.3-4.3"></path>
             </g>
           </svg>
-          <input type="search" required placeholder="Search shaders..." />
+          <input
+            type="search"
+            placeholder="Search shaders..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </label>
 
         <div className="flex-none">

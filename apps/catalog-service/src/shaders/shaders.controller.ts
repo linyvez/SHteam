@@ -41,9 +41,10 @@ export class ShadersController {
   async findAll(
     @Query('page') page: string,
     @Query('limit') limit: string,
+    @Query('search') search: string
   ) {
     // Convert query strings to numbers, defaulting to page 1, 10 items
-    return this.shadersService.findAll(+page || 1, +limit || 10);
+    return this.shadersService.findAll(+page || 1, +limit || 10, search);
   }
 
   @Get(':id')

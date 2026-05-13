@@ -2,18 +2,31 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import MainLayout from "../../layouts/MainLayout";
 import type { Shader } from "../../../../../packages/shared";
+import { useSearchStore } from "../../store/searchStore";
 
 const Catalog = () => {
   const [shaders, setShaders] = useState<Shader[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Search States
+  const searchQuery = useSearchStore((state) => state.searchQuery);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   useEffect(() => {
     const fetchShaders = async () => {
+      setLoading(true);
       try {
-        const response = await fetch("/api/catalog/shaders");
+        const url = `/api/catalog/shaders?page=1&limit=20${debouncedSearch ? `&search=${encodeURIComponent(debouncedSearch)}` : ""}`;
+        const response = await fetch(url);
         if (!response.ok) throw new Error("Failed to fetch shaders");
-
         const data = await response.json();
         setShaders(data);
       } catch (err: any) {
@@ -24,7 +37,7 @@ const Catalog = () => {
     };
 
     fetchShaders();
-  }, []);
+  }, [debouncedSearch]);
 
   return (
     <MainLayout>

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import type { Shader } from "../../../../../packages/shared";
 import MainLayout from "../../layouts/MainLayout";
 import { useAuthStore } from "../../store/authStore";
+import { useSearchStore } from "../../store/searchStore";
 
 interface Order {
     shader_id: string;
@@ -10,6 +11,7 @@ interface Order {
 
 const Library = () => {
     const { user } = useAuthStore();
+    const searchQuery = useSearchStore((state) => state.searchQuery);
     // const [orders, setOrders] = useState<Order[]>([])
     const [shaders, setShaders] = useState<Shader[]>([]);
     const [loading, setLoading] = useState(true);
@@ -58,6 +60,11 @@ const Library = () => {
         fetchShaders();
     }, [user]);
 
+    const filteredShaders = shaders.filter(shader =>
+        shader.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (shader.description && shader.description.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
+
     return (
         <MainLayout>
             <div className="w-full max-w-6xl flex flex-col gap-6">
@@ -71,12 +78,14 @@ const Library = () => {
                     </div>
                 )}
 
-                {!loading && !error && shaders.length === 0 && (
-                    <p className="text-gray-400">No shaders found. Want to get new shaders in the library?</p>
+                {!loading && !error && filteredShaders.length === 0 && (
+                    <p className="text-gray-400">
+                        {searchQuery ? `No owned shaders match "${searchQuery}".` : "No shaders found. Want to get new shaders in the library?"}
+                    </p>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {shaders.map((shader) => (
+                    {filteredShaders.map((shader) => (
                         <div key={shader._id} className="card bg-shteam-comp shadow-xl border border-gray-800">
                             {/* Placeholder for the Three.js thumbnail later */}
                             <figure className="h-48 bg-base-300 overflow-hidden border-b border-base-300">

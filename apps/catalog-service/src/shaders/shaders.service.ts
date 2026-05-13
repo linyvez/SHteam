@@ -13,9 +13,20 @@ export class ShadersService {
     return createdShader.save();
   }
 
-  async findAll(page: number = 1, limit: number = 10): Promise<Shader[]> {
+  async findAll(page: number = 1, limit: number = 10, search?: string): Promise<Shader[]> {
     const skip = (page - 1) * limit;
-    return this.shaderModel.find().skip(skip).limit(limit).exec();
+
+    const query: any = {};
+    if (search) {
+      query.title = { $regex: search, $options: 'i' };
+    }
+
+    return this.shaderModel
+        .find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .exec();
   }
 
   async findOne(id: string): Promise<Shader> {
