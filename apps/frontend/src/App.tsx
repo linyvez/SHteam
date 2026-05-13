@@ -5,6 +5,8 @@ import Profile from "./pages/auth/Profile";
 import Catalog from "./pages/home/Catalog";
 import CreateShader from "./pages/studio/CreateShader";
 import ShaderDetails from "./pages/home/ShaderDetails";
+import Library from "./pages/library/Library"
+import Checkout from "./pages/checkout/Checkout"
 import { useAuthStore } from "./store/authStore";
 import { useEffect, type JSX } from "react";
 
@@ -57,6 +59,10 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+      <Route path="/library" element={<Library />} />
+
+      <Route path="/checkout/:shaderId" element={<Checkout />} />
 
       <Route
         path="/profile"
