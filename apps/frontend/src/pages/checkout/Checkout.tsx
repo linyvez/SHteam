@@ -7,9 +7,10 @@ import { useAuthStore } from "../../store/authStore";
 const Checkout = () => {
     const { shaderId } = useParams<{ shaderId: string }>();
     const [shader, setShader] = useState<Shader | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
     const navigate = useNavigate();
 
-    const { user } = useAuthStore();
+    const { user, topUpBalance } = useAuthStore();
 
     useEffect(() => {
         fetch(`/api/catalog/shaders/${shaderId}`)
@@ -27,8 +28,33 @@ const Checkout = () => {
     const isFree = shader.price === 0;
     const platformFee = isFree ? 0 : 0.50;
     const totalPrice = isFree ? 0 : Number(shader.price) + platformFee;
-
     const canAfford = (Number(user.balance) || 0) >= totalPrice;
+
+    const handlePurchase = async () => {
+        setIsProcessing(true);
+
+        try {
+
+            await fetch('/api/orders/purchase', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ shaderId, userId: user.id, price: totalPrice }),
+            });
+
+
+            if (!isFree) {
+                await topUpBalance(-totalPrice);
+            }
+
+            setTimeout(() => {
+                navigate('/library');
+            }, 1500);
+
+        } catch (err) {
+            console.error("Purchase failed", err);
+            setIsProcessing(false);
+        }
+    };
 
 
     return (
@@ -87,17 +113,19 @@ const Checkout = () => {
                     </div>
                     <button
                         className="btn btn-success btn-lg w-full mt-6 shadow-lg"
-                        disabled={!canAfford}
-                        onClick={async () => {
-                            await fetch('/api/orders/purchase', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ shaderId, userId: user.id, price: totalPrice }),
-                            })
-                            navigate('/library');
-                        }}
+                        disabled={!canAfford || isProcessing}
+                        onClick={handlePurchase}
                     >
-                        {canAfford ? "Confirm Purchase" : "Cannot Afford"}
+                        {isProcessing ? (
+                            <>
+                                <span className="loading loading-spinner"></span>
+                                Processing Order...
+                            </>
+                        ) : !canAfford ? (
+                            "Cannot Afford"
+                        ) : (
+                            "Confirm Purchase"
+                        )}
                     </button>
                 </div>
             </div>
