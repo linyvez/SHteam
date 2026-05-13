@@ -69,7 +69,14 @@ function App() {
         }
       />
 
-      <Route path="/checkout/:shaderId" element={<Checkout />} />
+      <Route
+        path="/checkout/:shaderId"
+        element={
+          <ProtectedRoute>
+            <Checkout />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/profile"
