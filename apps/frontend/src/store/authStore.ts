@@ -3,6 +3,8 @@ import { create } from "zustand";
 interface AuthState {
   user: { id: string; email: string; balance: number; created_at?: string } | null;
   token: string | null;
+  bankCredits: number;
+  setBankCredits: (credits: number | ((prev: number) => number)) => void;
   login: (email: string, pass: string) => Promise<void>;
   register: (email: string, pass: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -13,6 +15,11 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   token: localStorage.getItem("shteam_token"),
+  bankCredits: 1000,
+
+  setBankCredits: (credits) => set((state) => ({
+    bankCredits: typeof credits === 'function' ? credits(state.bankCredits) : credits
+  })),
 
   login: async (email, password) => {
     const res = await fetch("/api/auth/login", {

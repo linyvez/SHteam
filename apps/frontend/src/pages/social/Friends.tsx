@@ -13,12 +13,12 @@ export const Friends = () => {
 
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentUserId = user?.id;
 
   const fetchFriends = async () => {
-    if(!currentUserId) return;
+    if (!currentUserId) return;
 
     setIsLoadingFriends(true);
     try {
@@ -161,8 +161,8 @@ export const Friends = () => {
 
             {status.type && (
               <div className={`mt-4 px-4 py-3 rounded-lg border ${status.type === 'success'
-                  ? 'bg-[#121a14] text-[#5c8a63] border-[#203b26]'
-                  : 'bg-red-950/20 text-red-500 border-red-900/50'
+                ? 'bg-[#121a14] text-[#5c8a63] border-[#203b26]'
+                : 'bg-red-950/20 text-red-500 border-red-900/50'
                 }`}>
                 <span>{status.message}</span>
               </div>
@@ -184,19 +184,22 @@ export const Friends = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {friends.map((friend, index) => (
-                  <div key={index} className="flex items-center gap-3 bg-base-300 p-3 rounded-lg border border-gray-800 hover:border-[#5f859d] transition-colors cursor-default">
-                    <div className="avatar placeholder">
-                      <div className="bg-[#5f859d] text-white rounded-full w-10">
-                        <span>{friend.substring(0, 2).toUpperCase()}</span>
+                {friends.map((friend, index) => {
+                  const nickname = friend.split('-')[0];
+                  return (
+                    <div key={index} className="flex items-center gap-3 bg-base-300 p-3 rounded-lg border border-gray-800 hover:border-[#5f859d] transition-colors cursor-default">
+                      <div className="avatar">
+                        <div className="w-10 rounded-full bg-base-300">
+                          <img src={`https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${friend}`} alt={nickname} />
+                        </div>
+                      </div>
+                      <div>
+                        <p className="font-bold capitalize">{nickname}</p>
+                        <p className="text-xs text-gray-500">Connected</p>
                       </div>
                     </div>
-                    <div>
-                      <p className="font-semibold">{friend}</p>
-                      <p className="text-xs text-gray-500">Connected</p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

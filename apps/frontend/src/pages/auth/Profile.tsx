@@ -5,10 +5,9 @@ import { useAuthStore } from "../../store/authStore";
 
 
 const Profile = () => {
-  const { user, logout, topUpBalance } = useAuthStore();
+  const { user, logout, topUpBalance, bankCredits, setBankCredits } = useAuthStore();
   const navigate = useNavigate();
 
-  const [bankCredits, setBankCredits] = useState(1000);
   const [isToppingUp, setIsToppingUp] = useState(false);
 
   const [ownedCount, setOwnedCount] = useState(0);
@@ -74,7 +73,7 @@ const Profile = () => {
             <div className="avatar">
               <div className="w-24 rounded-full bg-base-300 ring ring-base-300 ring-offset-base-100 ring-offset-2">
                 <img
-                  src={`https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${user?.email || "default"}`}
+                  src={`https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${user?.id || "default"}`}
                   alt="Profile Avatar"
                 />
               </div>
@@ -172,27 +171,24 @@ const Profile = () => {
             {friends.length === 0 ? (
               <p className="text-center text-gray-500 py-8">You haven't added any friends yet. Click 'Manage Friends' to search for users!</p>
             ) : (
-              friends.map((friendId) => (
-                <div
-                  key={friendId}
-                  className="flex items-center justify-between py-4"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="avatar">
-                      <div className="w-12 rounded-full bg-base-300">
-                        <img
-                          src={`https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${friendId}`}
-                          alt={friendId}
-                        />
+              friends.map((friendId) => {
+                const nickname = friendId.split('-')[0];
+                return (
+                  <div key={friendId} className="flex items-center justify-between py-4">
+                    <div className="flex items-center gap-4">
+                      <div className="avatar">
+                        <div className="w-12 rounded-full bg-base-300">
+                          <img src={`https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${friendId}`} alt={nickname} />
+                        </div>
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-200 capitalize">{nickname}</p>
+                        <p className="text-xs text-gray-500 mt-1">ID: {friendId}</p>
                       </div>
                     </div>
-                    <div>
-                      <p className="font-mono text-sm text-gray-200">{friendId}</p>
-                      <p className="text-xs text-gray-500 mt-1">Connected</p>
-                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>

@@ -99,14 +99,14 @@ const ShaderDetails = () => {
                 </div>
 
                 <div className="w-full md:w-96 flex flex-col gap-4 bg-shteam-comp p-6 rounded-box border border-gray-800 relative overflow-y-auto">
-                    <button onClick={() => navigate("/catalog")} className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-gray-400 hover:text-white">✕</button>
-                    
+                    <button onClick={() => navigate(-1)} className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-gray-400 hover:text-white">✕</button>
+
                     <h1 className="text-3xl font-bold pr-8">{shader.title}</h1>
-                    
+
                     <span className="font-mono text-cyan-400 font-bold bg-base-300 px-3 py-1 rounded-md border border-gray-700 w-fit">
                         {shader.price === 0 ? "FREE" : `$${shader.price}`}
                     </span>
-                    
+
                     <p className="text-gray-400">{shader.description}</p>
 
                     <div className="divider before:bg-gray-800 after:bg-gray-800 text-gray-500">Controls</div>

@@ -5,6 +5,7 @@ import { useSearchStore } from "../store/searchStore";
 
 const Header = ({ type }: { type: string }) => {
   const logout = useAuthStore((state) => state.logout);
+  const { user } = useAuthStore();
   const navigate = useNavigate();
 
   const { searchQuery, setSearchQuery } = useSearchStore();
@@ -77,7 +78,7 @@ const Header = ({ type }: { type: string }) => {
             <div className="w-10 rounded-full">
               <img
                 alt="Profile img"
-                src="https://api.dicebear.com/9.x/bottts-neutral/svg?seed=Aneka"
+                src={`https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${user?.id || "default"}`}
               />
             </div>
           </div>
