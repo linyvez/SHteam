@@ -19,6 +19,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
 
   return children;
 };
+import { Friends } from "./pages/social/Friends";
 
 function App() {
   const fetchUser = useAuthStore((state) => state.fetchUser);
@@ -83,6 +84,15 @@ function App() {
         element={
           <ProtectedRoute>
             <Profile />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/friends"
+        element={
+          <ProtectedRoute>
+            <Friends />
           </ProtectedRoute>
         }
       />

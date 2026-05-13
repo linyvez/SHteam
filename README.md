@@ -40,3 +40,6 @@ docker stop shteam-identity-1
 ```
 
 2. Go back to the website - session should stay the same, so there will be no need to login again.
+
+
+This commit is for you!

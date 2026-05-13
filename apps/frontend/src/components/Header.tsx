@@ -5,6 +5,7 @@ import { useSearchStore } from "../store/searchStore";
 
 const Header = ({ type }: { type: string }) => {
   const logout = useAuthStore((state) => state.logout);
+  const { user } = useAuthStore();
   const navigate = useNavigate();
 
   const { searchQuery, setSearchQuery } = useSearchStore();
@@ -29,8 +30,10 @@ const Header = ({ type }: { type: string }) => {
           SHteam
         </Link>
       </div>
-      <div className="flex gap-2">
-        <label className="input bg-shteam-input">
+
+      <div className="flex items-center gap-2">
+
+        <label className="input bg-shteam-input flex items-center gap-2">
           <svg
             className="h-[1em] opacity-50"
             xmlns="http://www.w3.org/2000/svg"
@@ -75,7 +78,7 @@ const Header = ({ type }: { type: string }) => {
             <div className="w-10 rounded-full">
               <img
                 alt="Profile img"
-                src="https://api.dicebear.com/9.x/bottts-neutral/svg?seed=Aneka"
+                src={`https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${user?.id || "default"}`}
               />
             </div>
           </div>

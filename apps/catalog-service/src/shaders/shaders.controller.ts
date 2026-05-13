@@ -11,11 +11,11 @@ export class ShadersController {
 
   constructor(private readonly shadersService: ShadersService) {
     this.minioClient = new Minio.Client({
-      endPoint: 'minio',
-      port: 9000,
+      endPoint: process.env.MINIO_ENDPOINT || 'minio',
+      port: parseInt(process.env.MINIO_PORT || '9000', 10),
       useSSL: false,
-      accessKey: 'minioadmin',
-      secretKey: 'minioadmin'
+      accessKey: process.env.MINIO_ACCESS_KEY || 'minioadmin',
+      secretKey: process.env.MINIO_SECRET_KEY || 'minioadmin'
     });
   }
 
@@ -29,7 +29,9 @@ export class ShadersController {
 
     await this.minioClient.putObject('shader-thumbnails', fileName, file.buffer);
 
-    const thumbnailUrl = `http://localhost:9000/shader-thumbnails/${fileName}`;
+    const publicUrl = process.env.MINIO_PUBLIC_URL || 'http://localhost:9000';
+
+    const thumbnailUrl = `${publicUrl}/shader-thumbnails/${fileName}`;
 
     return this.shadersService.create({
       ...createShaderDto,
@@ -65,7 +67,8 @@ export class ShadersController {
     if (file) {
       const fileName = `${Date.now()}-${file.originalname}`;
       await this.minioClient.putObject('shader-thumbnails', fileName, file.buffer);
-      updateData.thumbnailUrl = `http://localhost:9000/shader-thumbnails/${fileName}`;
+      const publicUrl = process.env.MINIO_PUBLIC_URL || 'http://localhost:9000';
+      updateData.thumbnailUrl = `${publicUrl}/shader-thumbnails/${fileName}`;
     }
 
     return this.shadersService.update(id, updateData);
