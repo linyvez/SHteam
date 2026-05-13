@@ -16,7 +16,7 @@ export class CassandraService implements OnModuleInit, OnModuleDestroy {
 
     async getOrders (userId: string) {
         const query = 'SELECT * FROM shteam_order_history.orders_by_id WHERE user_id = ?';
-        const result = await this.client.execute(query, [userId]);
+        const result = await this.client.execute(query, [userId], {prepare: true});
         return result.rows;
     }
 
