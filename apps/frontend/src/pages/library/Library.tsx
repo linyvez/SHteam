@@ -39,13 +39,15 @@ const Library = () => {
                     return;
                 }
 
-                for (const order of orders) {
+                const shaderPromises = orders.map(async (order: any) => {
+                    const response = await fetch(`/api/catalog/shaders/${order.shader_id}`);
+                    return await response.json();
+                });
 
-                    const response = await fetch(`/api/catalog/shaders/${order.shader_id}`)
-                    const shader = await response.json();
+                const fetchedShaders = await Promise.all(shaderPromises);
 
-                    setShaders(prev => [...prev, shader]);
-                }
+                setShaders(fetchedShaders);
+
             } catch (err: any) {
                 setError('Error while fetching one of the shaders: ' + err);
             } finally {

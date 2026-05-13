@@ -50,7 +50,7 @@ const Header = ({ type }: { type: string }) => {
         <div className="flex-none">
           <ul className="menu menu-horizontal px-1">
             <li>
-              <Link to="/">Store</Link>
+              <Link to="/catalog">Store</Link>
             </li>
             <li>
               <Link to="/library">Library</Link>
