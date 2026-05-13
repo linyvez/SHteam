@@ -129,7 +129,7 @@ const ShaderDetails = () => {
           />
 
           <div className="mt-auto pt-4">
-            <button className="btn btn-success w-full">Add to Library</button>
+            <button className="btn btn-success w-full" onClick={() => navigate(`/checkout/${id}`)}>Checkout</button>
           </div>
         </div>
       </div>
