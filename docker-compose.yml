@@ -123,6 +123,14 @@ services:
     volumes:
       - ./apps/catalog-service:/app/apps/catalog-service
       - ./packages/shared:/app/packages/shared
+    environment:
+      # Inject the variables from the .env file!
+      - MONGO_URI=mongodb://mongo1:27017,mongo2:27018,mongo3:27019/shteam_catalog?replicaSet=rs0
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_PUBLIC_URL=http://localhost:9000
     depends_on:
       mongo-init:
         condition: service_completed_successfully
