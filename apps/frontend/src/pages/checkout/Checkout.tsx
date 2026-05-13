@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import MainLayout from "../../layouts/MainLayout";
 import type { Shader } from "../../../../../packages/shared";
+import { useAuthStore } from "../../store/authStore";
 
 const Checkout = () => {
     const { shaderId } = useParams<{ shaderId: string }>();
@@ -9,21 +10,21 @@ const Checkout = () => {
     const navigate = useNavigate();
 
     // PLACHOLDER
-    const userId = '100';
+    const { user } = useAuthStore();
 
     useEffect(() => {
-            fetch(`http://localhost:3000/api/catalog/shaders/${shaderId}`)
-                .then((res) => res.json())
-                .then((data: Shader) => {
-                    setShader(data);
+        fetch(`/api/catalog/shaders/${shaderId}`)
+            .then((res) => res.json())
+            .then((data: Shader) => {
+                setShader(data);
 
-                })
-                .catch((err) => console.error(err));
-        }, [shaderId]);
+            })
+            .catch((err) => console.error(err));
+    }, [shaderId]);
 
 
-    if (!shader) return <MainLayout><div className="loading loading-spinner mt-20"></div></MainLayout>;
-    
+    if (!shader || !user) return <MainLayout><div className="loading loading-spinner mt-20"></div></MainLayout>;
+
 
     return (
         <MainLayout>
@@ -66,7 +67,7 @@ const Checkout = () => {
                         </div>
                         <div className="mt-6 text-gray-400 text-sm">
                             <p>
-                                <strong>Note:</strong> This is a demo checkout. No real payment is processed.<br/>
+                                <strong>Note:</strong> This is a demo checkout. No real payment is processed.<br />
                                 By confirming, you agree to add this shader to your library.
                             </p>
                         </div>
@@ -74,10 +75,10 @@ const Checkout = () => {
                     <button
                         className="btn btn-success btn-lg w-full mt-6 shadow-lg"
                         onClick={async () => {
-                            await fetch('http://localhost:3001/api/orders/purchase', {
+                            await fetch('/api/orders/purchase', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ shaderId, userId }),
+                                body: JSON.stringify({ shaderId, userId: user.id }),
                             })
                             navigate('/library');
                         }}

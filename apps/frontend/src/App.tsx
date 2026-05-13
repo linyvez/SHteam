@@ -60,7 +60,14 @@ function App() {
         }
       />
 
-      <Route path="/library" element={<Library />} />
+      <Route
+        path="/library"
+        element={
+          <ProtectedRoute>
+            <Library />
+          </ProtectedRoute>
+        }
+      />
 
       <Route path="/checkout/:shaderId" element={<Checkout />} />
 
