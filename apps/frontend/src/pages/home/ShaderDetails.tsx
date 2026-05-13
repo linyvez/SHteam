@@ -21,7 +21,7 @@ const ShaderDetails = () => {
     const [isCheckingOwnership, setIsCheckingOwnership] = useState<boolean>(true);
 
     useEffect(() => {
-        if (!user || !id) return;
+        if (!id) return;
 
         fetch(`/api/catalog/shaders/${id}`)
             .then((res) => res.json())
@@ -43,18 +43,22 @@ const ShaderDetails = () => {
                 setDynamicSliders(foundUniforms);
             })
             .catch((err) => console.error(err));
+    }, [id]);
+
+
+    useEffect(() => {
+        if (!user || !id) return;
 
         fetch(`/api/orders/history?userId=${user.id}`)
             .then((res) => res.json())
             .then((data) => {
                 const orders = data.user_orders || [];
-                // Check if the current shader ID exists in their purchase history
-                const alreadyOwned = orders.some((order: any) => order.shader_id === id);
-                setIsOwned(alreadyOwned);
+                setIsOwned(orders.some((order: any) => order.shader_id === id));
             })
             .catch((err) => console.error("Failed to verify ownership:", err))
             .finally(() => setIsCheckingOwnership(false));
-    }, [id]);
+
+    }, [id, user]);
 
     const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];

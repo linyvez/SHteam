@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../../layouts/MainLayout";
+import { useAuthStore } from "../../store/authStore";
 
 const CreateShader = () => {
   const navigate = useNavigate();
+  const { user, token } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -28,6 +30,11 @@ const CreateShader = () => {
       return;
     }
 
+    if (!user) {
+      setError("You must be logged in to publish.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -40,10 +47,13 @@ const CreateShader = () => {
 
       formData.append("thumbnail", thumbnail);
 
-      formData.append("authorId", "temp_user_123");
+      formData.append("authorId", user.id);
 
       const response = await fetch("/api/catalog/shaders", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
         body: formData,
       });
 

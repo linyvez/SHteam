@@ -1,6 +1,7 @@
 {
   "name": "shteam",
   "version": "1.0.0",
+  "private": true,
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -27,5 +28,9 @@
   },
   "dependencies": {
     "cassandra-driver": "^4.9.0"
+  },
+  "optionalDependencies": {
+    "lightningcss-linux-arm64-musl": "1.32.0",
+    "lightningcss-linux-x64-musl": "1.32.0"
   }
 }

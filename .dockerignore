@@ -8,6 +8,8 @@ dist
 apps/*/dist
 packages/*/dist
 
+npm-debug.log
+
 # Ignore environment files and git history
 .env
 .git
