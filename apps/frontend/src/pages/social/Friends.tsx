@@ -1,24 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import MainLayout from '../../layouts/MainLayout';
+import { useAuthStore } from "../../store/authStore";
 
 export const Friends = () => {
+  const { user } = useAuthStore();
   const [friendId, setFriendId] = useState('');
   const [status, setStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [friends, setFriends] = useState<string[]>([]);
   const [isLoadingFriends, setIsLoadingFriends] = useState(true);
-  
+
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  const currentUserId = "a"; 
+
+  const currentUserId = user?.id;
 
   const fetchFriends = async () => {
+    if(!currentUserId) return;
+
     setIsLoadingFriends(true);
     try {
-      const response = await fetch(`http://localhost:3001/api/social/friends?userId=${currentUserId}`);
+      const response = await fetch(`/api/social/friends?userId=${currentUserId}`);
       if (response.ok) {
         const data = await response.json();
         setFriends(data);
@@ -45,7 +49,7 @@ export const Friends = () => {
     if (value.trim().length > 0) {
       searchTimeoutRef.current = setTimeout(async () => {
         try {
-          const res = await fetch(`http://localhost:3001/api/social/users/search?q=${value}`);
+          const res = await fetch(`/api/social/users/search?q=${value}`);
           if (res.ok) {
             const data: string[] = await res.json();
             const filtered = data.filter(id => id !== currentUserId && !friends.includes(id));
@@ -69,27 +73,27 @@ export const Friends = () => {
 
   const handleAddFriend = async () => {
     if (!friendId.trim()) return;
-    
+
     setIsLoading(true);
     setStatus({ type: null, message: '' });
     setShowSuggestions(false);
 
     try {
-      const response = await fetch('http://localhost:3001/api/social/friends/add', {
+      const response = await fetch('/api/social/friends/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: currentUserId, friendId })
       });
-      
+
       if (response.ok) {
         setStatus({ type: 'success', message: 'Friend added successfully!' });
         setFriendId('');
         fetchFriends();
       } else {
         const errorData = await response.json().catch(() => null);
-        setStatus({ 
-          type: 'error', 
-          message: errorData?.message || 'Failed to add friend. User might not exist.' 
+        setStatus({
+          type: 'error',
+          message: errorData?.message || 'Failed to add friend. User might not exist.'
         });
       }
     } catch (error) {
@@ -116,20 +120,20 @@ export const Friends = () => {
 
             <div className="flex flex-col sm:flex-row gap-4 relative">
               <div className="relative w-full">
-                <input 
-                  type="text" 
-                  placeholder="Search user ID..." 
+                <input
+                  type="text"
+                  placeholder="Search user ID..."
                   value={friendId}
                   onChange={handleInputChange}
                   onFocus={() => friendId.trim() && setSuggestions([...suggestions])}
                   className="input input-bordered w-full bg-base-300 border-gray-700 focus:border-[#5f859d] focus:outline-none"
                   onKeyDown={(e) => e.key === 'Enter' && handleAddFriend()}
                 />
-                
+
                 {showSuggestions && suggestions.length > 0 && (
                   <ul className="absolute top-full left-0 right-0 mt-2 bg-base-300 border border-gray-700 rounded-lg shadow-2xl z-50 overflow-hidden">
                     {suggestions.map((suggestId) => (
-                      <li 
+                      <li
                         key={suggestId}
                         onClick={() => handleSelectSuggestion(suggestId)}
                         className="px-4 py-3 hover:bg-[#5f859d] hover:text-white cursor-pointer transition-colors flex items-center gap-3"
@@ -146,8 +150,8 @@ export const Friends = () => {
                 )}
               </div>
 
-              <button 
-                onClick={handleAddFriend} 
+              <button
+                onClick={handleAddFriend}
                 disabled={isLoading || !friendId.trim()}
                 className="btn border-none bg-[#5f859d] hover:bg-[#4a6b82] text-white min-w-[120px]"
               >
@@ -156,21 +160,20 @@ export const Friends = () => {
             </div>
 
             {status.type && (
-              <div className={`mt-4 px-4 py-3 rounded-lg border ${
-                status.type === 'success' 
-                  ? 'bg-[#121a14] text-[#5c8a63] border-[#203b26]' 
+              <div className={`mt-4 px-4 py-3 rounded-lg border ${status.type === 'success'
+                  ? 'bg-[#121a14] text-[#5c8a63] border-[#203b26]'
                   : 'bg-red-950/20 text-red-500 border-red-900/50'
-              }`}>
+                }`}>
                 <span>{status.message}</span>
               </div>
             )}
           </div>
         </div>
-        
+
         <div className="card bg-shteam-comp shadow-xl border border-gray-800">
           <div className="card-body">
             <h2 className="card-title text-xl mb-4">Your Friends</h2>
-            
+
             {isLoadingFriends ? (
               <div className="flex justify-center py-8">
                 <span className="loading loading-spinner text-[#5f859d]"></span>

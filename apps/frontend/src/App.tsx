@@ -88,7 +88,14 @@ function App() {
         }
       />
 
-      <Route path="/friends" element={<Friends />} />
+      <Route
+        path="/friends"
+        element={
+          <ProtectedRoute>
+            <Friends />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

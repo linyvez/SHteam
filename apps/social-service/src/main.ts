@@ -10,7 +10,7 @@ async function bootstrap() {
     transport: Transport.KAFKA,
     options: {
       client: {
-        brokers: [process.env.KAFKA_BROKER || 'localhost:9092'],
+        brokers: [process.env.KAFKA_BROKER || 'kafka:9092'],
       },
       consumer: {
         groupId: 'social-consumer-group',
@@ -20,7 +20,7 @@ async function bootstrap() {
 
   await app.startAllMicroservices();
   await app.listen(3001);
-  
+
   console.log('Social Service is running on http://localhost:3001');
   console.log('Kafka Consumer is listening...');
 }
