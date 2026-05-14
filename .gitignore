@@ -22,3 +22,8 @@ lerna-debug.log*
 # temp directory
 .temp
 .tmp
+
+minio-data/
+
+apps/*/package-lock.json
+packages/*/package-lock.json

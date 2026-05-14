@@ -1,0 +1,42 @@
+[
+  {
+    "title": "VHS Glitch",
+    "description": "Animated glitch",
+    "price": 10,
+    "vertexShader": "varying vec2 vUv;\nvoid main() {\nvUv = uv;\ngl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n}",
+    "fragmentShader": "uniform sampler2D u_texture;\nuniform float u_time;\nvarying vec2 vUv;\nvoid main() {\nvec2 uv = vUv;\nfloat glitchOffset = sin(uv.y * 50.0 + u_time * 15.0) * 0.005;\nglitchOffset *= step(0.95, sin(u_time * 5.0)); \nfloat r = texture2D(u_texture, uv + vec2(glitchOffset, 0.0)).r;\nfloat g = texture2D(u_texture, uv).g;\nfloat b = texture2D(u_texture, uv - vec2(glitchOffset, 0.0)).b;\nfloat alpha = texture2D(u_texture, uv).a;\nfloat scanline = sin(uv.y * 800.0) * 0.04;\nvec3 finalColor = vec3(r, g, b) - scanline;\ngl_FragColor = vec4(finalColor, alpha);\n}",
+    "thumbnailFile": "images/glitch.jpg"
+  },
+  {
+    "title": "Quantum Ignition",
+    "description": "!Epilepsy Warning!",
+    "price": 15,
+    "vertexShader": "varying vec2 vUv;\nvarying vec3 vPosition;\nuniform float u_time;\nvoid main() {\nvUv = uv;\nvPosition = position;\nfloat pulseAmplitude = 0.05;\nfloat pulseFrequency = 5.0;\nfloat pulse = sin(u_time * pulseFrequency + position.y * 2.0) * pulseAmplitude;\nvec3 excitedPosition = position + (normalize(position) * pulse);\ngl_Position = projectionMatrix * modelViewMatrix * vec4(excitedPosition, 1.0);\n}",
+    "fragmentShader": "uniform sampler2D u_texture;\nuniform float u_time;\nvarying vec2 vUv;\nfloat random(vec2 st) {\nreturn fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);\n}\nvoid main() {\nvec2 uv = vUv;\nvec4 texColor = texture2D(u_texture, uv);\nfloat alpha = texColor.a;\nif(alpha < 0.01) discard; \nvec3 baseRainbow = 0.5 + 0.5 * cos(u_time + uv.xyx + vec3(0, 2, 4));\nfloat glowIntensity = pow(alpha, 3.0) * 2.0;\nvec3 electricGlow = baseRainbow * glowIntensity;\nfloat sparkNoise = random(uv * 50.0 + sin(u_time * 10.0));\nfloat sparks = step(0.99, sparkNoise + random(uv + u_time) * 0.1);\nvec3 sparkColor = vec3(1.0);\nfloat flicker = 0.8 + 0.2 * sin(u_time * 30.0);\nfloat finalAlpha = alpha * flicker;\nvec3 finalRGB = texColor.rgb;\nfinalRGB += electricGlow * (0.8 + 0.2 * sin(u_time * 10.0));\nfinalRGB += sparkColor * sparks;\ngl_FragColor = vec4(finalRGB, finalAlpha);\n}",
+    "thumbnailFile": "images/quantum.jpg"
+  },
+  {
+    "title": "8-bit Arcade Smash",
+    "description": "Destroy the smooth resolution of your image",
+    "price": 5,
+    "vertexShader": "varying vec2 vUv;\n\nvoid main() {\n  vUv = uv;\n  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n}",
+    "fragmentShader": "uniform sampler2D u_texture;\nuniform float u_time;\nvarying vec2 vUv;\n\nvoid main() {\n  float gridSize = 48.0;\n  vec2 pixelatedUV = floor(vUv * gridSize) / gridSize;\n  \n  vec4 tex = texture2D(u_texture, pixelatedUV);\n  if(tex.a < 0.1) discard;\n\n  float r = sin(u_time * 12.0) * 0.5 + 0.5;\n  float g = sin(u_time * 15.0 + 2.0) * 0.5 + 0.5;\n  float b = sin(u_time * 18.0 + 4.0) * 0.5 + 0.5;\n  \n  vec3 rainbow = vec3(r, g, b);\n  vec3 finalColor = step(0.3, tex.rgb) * rainbow * 2.5;\n\n  gl_FragColor = vec4(finalColor, tex.a);\n}",
+    "thumbnailFile": "images/smash.jpg"
+  },
+  {
+    "title": "Cosmic Ghost Nebula",
+    "description": "!HIGH EPILEPSY WARNING! Deep space nebula...",
+    "price": 12,
+    "vertexShader": "varying vec2 vUv;\nuniform float u_time;\n\nvoid main() {\n  vUv = uv;\n  \n  float swayX = sin(u_time * 2.0 + position.y * 3.0) * 0.03;\n  float swayY = cos(u_time * 1.5 + position.x * 2.0) * 0.03;\n  \n  vec3 pos = position;\n  pos.x += swayX;\n  pos.y += swayY;\n\n  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);\n}",
+    "fragmentShader": "uniform sampler2D u_texture;\nuniform float u_time;\nvarying vec2 vUv;\n\nfloat random(vec2 st) {\n    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);\n}\n\nvoid main() {\n  vec4 tex = texture2D(u_texture, vUv);\n  if(tex.a < 0.05) discard;\n\n  float starNoise = random(vUv * 80.0 + u_time * 0.2);\n  float stars = step(0.98, starNoise + random(vUv + u_time) * 0.1); \n\n  vec3 spaceColor = tex.rgb * vec3(0.5, 0.0, 1.5);\n  \n  vec3 finalColor = spaceColor + vec3(stars * 2.0);\n\n  float ghostlyAlpha = tex.a * (0.6 + 0.4 * sin(u_time * 3.0 + vUv.x * 5.0));\n\n  gl_FragColor = vec4(finalColor, ghostlyAlpha);\n}",
+    "thumbnailFile": "images/nebula.jpg"
+  },
+  {
+    "title": "Holographic Data Stream",
+    "description": "",
+    "price": 25,
+    "vertexShader": "varying vec2 vUv;\nuniform float u_time;\n\nvoid main() {\n  vUv = uv;\n  \n  float tear = sin(position.y * 20.0 + u_time * 30.0);\n  float glitchActive = step(0.95, sin(u_time * 8.0));\n  \n  vec3 pos = position;\n  pos.x += tear * 0.05 * glitchActive;\n\n  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);\n}",
+    "fragmentShader": "uniform sampler2D u_texture;\nuniform float u_time;\nvarying vec2 vUv;\n\nvoid main() {\n  vec4 tex = texture2D(u_texture, vUv);\n  if(tex.a < 0.05) discard;\n\n  float scanline = sin(vUv.y * 150.0 - u_time * 20.0) * 0.5 + 0.5;\n  \n  vec3 holoColor = vec3(0.1, 1.5, 1.0) * tex.rgb;\n  \n  vec3 finalColor = holoColor * (0.4 + 0.6 * scanline);\n\n  gl_FragColor = vec4(finalColor, tex.a * (0.7 + 0.3 * scanline));\n}",
+    "thumbnailFile": "images/hologram.jpg"
+  }
+]
