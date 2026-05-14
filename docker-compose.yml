@@ -124,7 +124,6 @@ services:
       - ./apps/catalog-service:/app/apps/catalog-service
       - ./packages/shared:/app/packages/shared
     environment:
-      # Inject the variables from the .env file!
       - MONGO_URI=mongodb://mongo1:27017,mongo2:27018,mongo3:27019/shteam_catalog?replicaSet=rs0
       - MINIO_ENDPOINT=minio
       - MINIO_PORT=9000
@@ -136,6 +135,20 @@ services:
         condition: service_completed_successfully
       minio-init:
         condition: service_completed_successfully
+    networks:
+      - shteam-net
+
+  catalog-init:
+    image: node:20-alpine
+    container_name: shteam-catalog-init
+    working_dir: /app
+    volumes:
+      - ./apps/catalog-service/src/seed:/app
+    depends_on:
+      catalog-service:
+        condition: service_started
+    command: node seed.js
+    restart: "no"
     networks:
       - shteam-net
 
@@ -332,7 +345,7 @@ services:
       - NEO4J_PASSWORD=password123
     depends_on:
       neo4j:
-       condition: service_started
+        condition: service_started
       kafka-init:
         condition: service_completed_successfully
     networks:
