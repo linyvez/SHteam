@@ -10,7 +10,7 @@ const Checkout = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const navigate = useNavigate();
 
-    const { user, topUpBalance } = useAuthStore();
+    const { user, fetchUser } = useAuthStore();
 
     useEffect(() => {
         fetch(`/api/catalog/shaders/${shaderId}`)
@@ -31,6 +31,8 @@ const Checkout = () => {
     const canAfford = (Number(user.balance) || 0) >= totalPrice;
 
     const handlePurchase = async () => {
+        if (isProcessing) return;
+
         setIsProcessing(true);
 
         try {
@@ -41,10 +43,7 @@ const Checkout = () => {
                 body: JSON.stringify({ shaderId, userId: user.id, price: totalPrice }),
             });
 
-
-            if (!isFree) {
-                await topUpBalance(-totalPrice);
-            }
+            await fetchUser();
 
             setTimeout(() => {
                 navigate('/library');
