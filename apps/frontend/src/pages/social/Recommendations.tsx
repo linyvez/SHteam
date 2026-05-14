@@ -22,6 +22,11 @@ export const Recommendations = ({ userId }: { userId: string }) => {
       setIsLoading(true);
       try {
         const socialRes = await fetch(`/api/social/recommendations?userId=${userId}`);
+
+        if (!socialRes.ok) {
+            throw new Error(`Social service failed with status: ${socialRes.status}`);
+        }
+
         const baseRecs: Recommendation[] = await socialRes.json();
 
         if (!Array.isArray(baseRecs) || baseRecs.length === 0) {
