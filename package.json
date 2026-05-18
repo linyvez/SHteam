@@ -27,7 +27,8 @@
     "concurrently": "^9.2.1"
   },
   "dependencies": {
-    "cassandra-driver": "^4.9.0"
+    "cassandra-driver": "^4.9.0",
+    "uuid": "^14.0.0"
   },
   "optionalDependencies": {
     "lightningcss-linux-arm64-musl": "1.32.0",

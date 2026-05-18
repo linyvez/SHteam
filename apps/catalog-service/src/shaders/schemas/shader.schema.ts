@@ -12,16 +12,16 @@ export class Shader {
   description?: string;
 
   @Prop({ required: true })
-  authorId!: string; // Will later link to Identity Service
+  authorId!: string;
 
   @Prop({ required: true, default: 0 })
   price!: number;
 
   @Prop({ required: true })
-  vertexShader!: string; // The GLSL code for the vertex shader
+  vertexShader!: string;
 
   @Prop({ required: true })
-  fragmentShader!: string; // The GLSL code for the fragment shader
+  fragmentShader!: string;
 
   @Prop()
   thumbnailUrl?: string;

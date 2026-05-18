@@ -197,10 +197,11 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_NUM_PARTITIONS: 3
     healthcheck:
-      test: [
+      test:
+        [
           "CMD-SHELL",
           "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list",
-        ] # list all existing topics via shell command, either 0 or 1+
+        ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -223,6 +224,7 @@ services:
       /opt/kafka/bin/kafka-topics.sh --create --if-not-exists --topic ORDER_INITIATED --partitions 1 --replication-factor 1 --bootstrap-server shteam-kafka:9092 &&
       /opt/kafka/bin/kafka-topics.sh --create --if-not-exists --topic FUNDS_RESERVED --partitions 1 --replication-factor 1 --bootstrap-server shteam-kafka:9092 &&
       /opt/kafka/bin/kafka-topics.sh --create --if-not-exists --topic INSUFFICIENT_FUNDS --partitions 1 --replication-factor 1 --bootstrap-server shteam-kafka:9092 &&
+      /opt/kafka/bin/kafka-topics.sh --create --if-not-exists --topic ORDER_REVERT_FUNDS --partitions 1 --replication-factor 1 --bootstrap-server shteam-kafka:9092 &&
       echo 'Topic creation done!'
       "
     networks:
@@ -309,6 +311,8 @@ services:
       - postgres
       - redis
       - kafka-init
+    environment:
+      - TYPEORM_SYNC=false
     networks:
       - shteam-net
 
