@@ -1,11 +1,22 @@
 import 'multer';
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ShadersService } from './shaders.service';
 import { CreateShaderDto } from './dto/create-shader.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as Minio from 'minio';
 
-@Controller('api/catalog/shaders') // Base route matches your requirements
+@Controller('api/catalog/shaders')
 export class ShadersController {
   private minioClient: Minio.Client;
 
@@ -15,7 +26,7 @@ export class ShadersController {
       port: parseInt(process.env.MINIO_PORT || '9000', 10),
       useSSL: false,
       accessKey: process.env.MINIO_ACCESS_KEY || 'minioadmin',
-      secretKey: process.env.MINIO_SECRET_KEY || 'minioadmin'
+      secretKey: process.env.MINIO_SECRET_KEY || 'minioadmin',
     });
   }
 
@@ -23,11 +34,15 @@ export class ShadersController {
   @UseInterceptors(FileInterceptor('thumbnail'))
   async create(
     @UploadedFile() file: Express.Multer.File,
-    @Body() createShaderDto: CreateShaderDto
+    @Body() createShaderDto: CreateShaderDto,
   ) {
     const fileName = `${Date.now()}-${file.originalname}`;
 
-    await this.minioClient.putObject('shader-thumbnails', fileName, file.buffer);
+    await this.minioClient.putObject(
+      'shader-thumbnails',
+      fileName,
+      file.buffer,
+    );
 
     const publicUrl = process.env.MINIO_PUBLIC_URL || 'http://localhost:9000';
 
@@ -43,9 +58,8 @@ export class ShadersController {
   async findAll(
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Query('search') search: string
+    @Query('search') search: string,
   ) {
-    // Convert query strings to numbers, defaulting to page 1, 10 items
     return this.shadersService.findAll(+page || 1, +limit || 10, search);
   }
 
@@ -59,14 +73,17 @@ export class ShadersController {
   async update(
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
-    @Body() updateShaderDto: Partial<CreateShaderDto>
+    @Body() updateShaderDto: Partial<CreateShaderDto>,
   ) {
     let updateData = { ...updateShaderDto };
 
-    // If the user uploaded a new image during the update, upload it to MinIO
     if (file) {
       const fileName = `${Date.now()}-${file.originalname}`;
-      await this.minioClient.putObject('shader-thumbnails', fileName, file.buffer);
+      await this.minioClient.putObject(
+        'shader-thumbnails',
+        fileName,
+        file.buffer,
+      );
       const publicUrl = process.env.MINIO_PUBLIC_URL || 'http://localhost:9000';
       updateData.thumbnailUrl = `${publicUrl}/shader-thumbnails/${fileName}`;
     }
@@ -76,8 +93,6 @@ export class ShadersController {
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    // Note: In a production app, you would also use this.minioClient.removeObject()
-    // here to delete the image from MinIO to save storage space.
     return this.shadersService.remove(id);
   }
 }
