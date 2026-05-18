@@ -49,7 +49,7 @@ const Checkout = () => {
       await fetchUser();
 
       setTimeout(() => {
-        alert("Purchase successful! Shader added to library.");
+        alert("Purchase successful! Your shader will be added to the library shortly.");
         navigate("/library");
       }, 1500);
     } catch (err) {
