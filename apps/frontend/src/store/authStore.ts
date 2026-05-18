@@ -96,7 +96,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const token = get().token;
     if (!token) return;
 
-    // Send the top-up request to the Identity Service via the Nginx Gateway
     const res = await fetch("/api/auth/topup", {
       method: "POST",
       headers: {
@@ -108,7 +107,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     if (res.ok) {
       const data = await res.json();
-      // Update the global state with the new balance from the database!
       set((state) => ({
         user: state.user ? { ...state.user, balance: data.newBalance } : null,
       }));

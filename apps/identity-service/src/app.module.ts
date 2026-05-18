@@ -4,6 +4,7 @@ import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/user.entity';
 import { SagaService } from './saga/saga.service';
+import { ProcessedOrder } from './saga/processed-order.entity';
 
 @Module({
   imports: [
@@ -14,12 +15,12 @@ import { SagaService } from './saga/saga.service';
       username: 'shteam_user',
       password: 'shteam_password',
       database: 'identity_db',
-      entities: [User],
-      synchronize: true,
+      entities: [User, ProcessedOrder],
+      synchronize: process.env.TYPEORM_SYNC !== 'false',
     }),
     UsersModule,
     AuthModule,
   ],
-  providers: [SagaService]
+  providers: [SagaService],
 })
 export class AppModule {}

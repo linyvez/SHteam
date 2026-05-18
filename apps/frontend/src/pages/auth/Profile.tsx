@@ -3,9 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import MainLayout from "../../layouts/MainLayout";
 import { useAuthStore } from "../../store/authStore";
 
-
 const Profile = () => {
-  const { user, logout, topUpBalance, bankCredits, setBankCredits } = useAuthStore();
+  const { user, logout, topUpBalance, bankCredits, setBankCredits } =
+    useAuthStore();
   const navigate = useNavigate();
 
   const [isToppingUp, setIsToppingUp] = useState(false);
@@ -17,29 +17,27 @@ const Profile = () => {
 
   const formattedDate = user?.created_at
     ? new Date(user.created_at).toLocaleDateString("en-US", {
-      month: "long",
-      year: "numeric",
-    })
+        month: "long",
+        year: "numeric",
+      })
     : null;
-
 
   useEffect(() => {
     if (!user) return;
 
     fetch(`/api/orders/history?userId=${user.id}`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         setOwnedCount(data.user_orders?.length || 0);
       })
-      .catch(err => console.error("Failed to fetch order history:", err));
+      .catch((err) => console.error("Failed to fetch order history:", err));
 
     fetch(`/api/social/friends?userId=${user.id}`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (Array.isArray(data)) setFriends(data);
       })
-      .catch(err => console.error("Failed to fetch friends:", err));
-
+      .catch((err) => console.error("Failed to fetch friends:", err));
   }, [user]);
 
   const handleLogout = async () => {
@@ -56,7 +54,7 @@ const Profile = () => {
     setIsToppingUp(true);
     try {
       await topUpBalance(50); // Add $50 to account
-      setBankCredits(prev => prev - 50); // Deduct from the virtual bank
+      setBankCredits((prev) => prev - 50); // Deduct from the virtual bank
     } catch (err) {
       console.error("Top up failed", err);
     } finally {
@@ -83,7 +81,9 @@ const Profile = () => {
               <p className="text-gray-400 mt-1">
                 {user?.email || "hunter@example.com"}
               </p>
-              <p className="text-xs font-mono text-gray-500 mt-1">ID: {user?.id}</p>
+              <p className="text-xs font-mono text-gray-500 mt-1">
+                ID: {user?.id}
+              </p>
               {formattedDate && (
                 <p className="text-xs text-gray-500 mt-2">
                   Member since {formattedDate}
@@ -119,14 +119,21 @@ const Profile = () => {
 
           <div className="flex flex-col items-end gap-2">
             <p className="text-sm text-gray-500">
-              External Bank: <span className="font-mono text-gray-400">${bankCredits.toFixed(2)}</span>
+              External Bank:{" "}
+              <span className="font-mono text-gray-400">
+                ${bankCredits.toFixed(2)}
+              </span>
             </p>
             <button
               onClick={handleTopUp}
               disabled={isToppingUp || bankCredits < 50}
               className="btn btn-primary"
             >
-              {isToppingUp ? <span className="loading loading-spinner"></span> : "+ Add $50.00"}
+              {isToppingUp ? (
+                <span className="loading loading-spinner"></span>
+              ) : (
+                "+ Add $50.00"
+              )}
             </button>
           </div>
         </div>
@@ -143,7 +150,11 @@ const Profile = () => {
               key={i}
               className="bg-shteam-comp border border-base-300 rounded-box p-6 flex flex-col items-center justify-center"
             >
-              <span className={`text-2xl font-bold ${stat.val === 'TBD' ? 'text-gray-600' : 'text-white'}`}>{stat.val}</span>
+              <span
+                className={`text-2xl font-bold ${stat.val === "TBD" ? "text-gray-600" : "text-white"}`}
+              >
+                {stat.val}
+              </span>
               <span className="text-xs text-gray-500 font-semibold tracking-wider mt-2 text-center">
                 {stat.label}
               </span>
@@ -162,28 +173,44 @@ const Profile = () => {
             </div>
 
             {/* THIS BUTTON LINKS TO DEVELOPER 4'S COMPONENT! */}
-            <Link to="/friends" className="btn btn-sm bg-[#5f859d] hover:bg-[#4a6b82] text-white border-none">
+            <Link
+              to="/friends"
+              className="btn btn-sm bg-[#5f859d] hover:bg-[#4a6b82] text-white border-none"
+            >
               + Manage Friends
             </Link>
           </div>
 
           <div className="flex flex-col divide-y divide-base-300/50">
             {friends.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">You haven't added any friends yet. Click 'Manage Friends' to search for users!</p>
+              <p className="text-center text-gray-500 py-8">
+                You haven't added any friends yet. Click 'Manage Friends' to
+                search for users!
+              </p>
             ) : (
               friends.map((friendId) => {
-                const nickname = friendId.split('-')[0];
+                const nickname = friendId.split("-")[0];
                 return (
-                  <div key={friendId} className="flex items-center justify-between py-4">
+                  <div
+                    key={friendId}
+                    className="flex items-center justify-between py-4"
+                  >
                     <div className="flex items-center gap-4">
                       <div className="avatar">
                         <div className="w-12 rounded-full bg-base-300">
-                          <img src={`https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${friendId}`} alt={nickname} />
+                          <img
+                            src={`https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${friendId}`}
+                            alt={nickname}
+                          />
                         </div>
                       </div>
                       <div>
-                        <p className="font-bold text-gray-200 capitalize">{nickname}</p>
-                        <p className="text-xs text-gray-500 mt-1">ID: {friendId}</p>
+                        <p className="font-bold text-gray-200 capitalize">
+                          {nickname}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          ID: {friendId}
+                        </p>
                       </div>
                     </div>
                   </div>
