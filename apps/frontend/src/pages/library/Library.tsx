@@ -84,7 +84,7 @@ const Library = () => {
           <p className="text-gray-400">
             {searchQuery
               ? `No owned shaders match "${searchQuery}".`
-              : "No shaders found. Want to get new shaders in the library?"}
+              : "No shaders found. Want to get new shaders in the store?"}
           </p>
         )}
 
