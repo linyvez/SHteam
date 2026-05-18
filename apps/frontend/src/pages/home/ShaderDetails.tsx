@@ -157,7 +157,7 @@ const ShaderDetails = () => {
                                 className="btn btn-secondary w-full"
                                 onClick={() => navigate('/library')}
                             >
-                                Already in Library
+                                Already Owned - Open Library
                             </button>
                         ) : (
                             <button

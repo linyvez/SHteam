@@ -202,7 +202,7 @@ services:
           "CMD-SHELL",
           "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list",
         ]
-      interval: 5s
+      interval: 8s
       timeout: 5s
       retries: 5
 
@@ -267,7 +267,6 @@ services:
     command: cqlsh cassandra -f /init.cql
     networks:
       - shteam-net
-  # Identity service
   postgres:
     image: postgres:15-alpine
     container_name: shteam-postgres

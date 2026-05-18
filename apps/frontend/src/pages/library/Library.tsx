@@ -1,21 +1,20 @@
+
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import type { Shader } from "../../../../../packages/shared";
 import MainLayout from "../../layouts/MainLayout";
 import { useAuthStore } from "../../store/authStore";
 import { useSearchStore } from "../../store/searchStore";
+import LibraryShaderModal from "./LibraryShaderModal";
 
-interface Order {
-  shader_id: string;
-}
 
 const Library = () => {
   const { user } = useAuthStore();
   const searchQuery = useSearchStore((state) => state.searchQuery);
-  // const [orders, setOrders] = useState<Order[]>([])
   const [shaders, setShaders] = useState<Shader[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedShaderId, setSelectedShaderId] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -23,9 +22,8 @@ const Library = () => {
     const fetchOrders = async () => {
       try {
         const response = await fetch(`/api/orders/history?userId=${user.id}`);
-        if (!response.ok) throw new Error("Failed to fetch user's orders");
+        if (!response.ok) throw new Error("Error: Library temporarily unavailible. Please try again later...");
         const data = await response.json();
-        // setOrders(data['user_orders']);
         return data["user_orders"];
       } catch (err: any) {
         setError(err.message);
@@ -94,7 +92,7 @@ const Library = () => {
           {filteredShaders.map((shader) => (
             <div
               key={shader._id}
-              className="card bg-shteam-comp shadow-xl border border-gray-800"
+              className="card bg-shteam-comp shadow-xl border border-gray-800 hover:border-[#5f859d] transition-colors overflow-hidden"
             >
               <figure className="h-48 bg-base-300 overflow-hidden border-b border-base-300">
                 <img
@@ -107,22 +105,34 @@ const Library = () => {
                 />
               </figure>
 
-              <div className="card-body p-4">
+              <div className="card-body p-4 ">
                 <h2 className="card-title text-lg">{shader.title}</h2>
                 <p className="text-sm text-gray-400 line-clamp-2">
                   {shader.description || "No description provided."}
                 </p>
                 <div className="card-actions justify-between items-center mt-4">
                   <span className="font-mono text-green-400 font-bold">
-                    {shader.price === 0 ? "FREE" : `$${shader.price}`}
+                    Owned
                   </span>
-                  <Link
-                    to={`/shader/${shader._id}`}
-                    className="btn btn-sm btn-primary"
+                  <button
+                    className="btn btn-sm border-none bg-[#5f859d] hover:bg-[#4a6b82] text-whit"
+                    onClick={() => {
+                      setSelectedShaderId(shader._id);
+                      setShowModal(true);
+                    }}
                   >
                     View Details
-                  </Link>
+                  </button>
                 </div>
+                {showModal && selectedShaderId && (
+                  (() => {
+                    const shader = shaders.find(s => s._id === selectedShaderId);
+                    if (!shader) return null;
+                    return (
+                      <LibraryShaderModal shader={shader} onClose={() => setShowModal(false)} />
+                    );
+                  })()
+                )}
               </div>
             </div>
           ))}
